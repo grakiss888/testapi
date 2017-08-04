@@ -1,0 +1,65 @@
+<h3>{{ctrl.pageHeader}}</h3>
+<p>{{ctrl.pageParagraph}}</p>
+<form class="form-inline" ng-show="ctrl.isUserResults">
+<h4>Upload Results</h4>
+<div class="form-group col-m-3">
+     <input class="form-contrl btn btn-default" type = "file" file-model = "resultFile"/>
+</div>
+<div class="form-group col-m-3">
+     <button class="btn btn-primary" ng-click = "ctrl.uploadFile()">upload result</button>
+</div>
+<div>
+<lable>{{ctrl.uploadState}}</label>
+</div>
+</form>
+<div class="row" style="margin-bottom:24px;"></div>
+<div cg-busy="{promise:ctrl.authRequest,message:'Loading'}"></div>
+<div cg-busy="{promise:ctrl.resultsRequest,message:'Loading'}"></div>
+<div ng-show="ctrl.data" class="results-table">
+    <table ng-data="ctrl.data.result" ng-show="ctrl.data" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Upload Date</th>
+                <th>Test ID</th>
+                <th ng-show="ctrl.isUserResults">Operation</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr ng-repeat="(index, result) in ctrl.data.tests">
+                <td>{{ result.upload_date }}</td>
+                <td><a ng-click="ctrl.gotoResultDetail(result.id)">{{ result.id }}</a></td>
+                <td ng-show="ctrl.isUserResults">
+                <label class="hide">
+		<input ng-disabled="auth.currentUser.openid!=result.owner" type="checkbox" ng-true-value="'true'" ng-false-value="'false'" ng-model="result.public" ng-click="ctrl.toggleCheck(result.id, 'public', result.public)"> public
+                </label>
+                <label>
+                <input ng-disabled="auth.currentUser.openid!=result.owner" type="checkbox" ng-true-value="'true'" ng-false-value="'false'" ng-model="result.review" ng-click="ctrl.toggleCheck(result.id, 'review', result.review)"> review
+                </label>
+                </td>
+            </tr>
+            <tr>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="pages">
+        <uib-pagination
+            total-items="ctrl.totalItems"
+            ng-model="ctrl.currentPage"
+            items-per-page="ctrl.itemsPerPage"
+            max-size="ctrl.maxSize"
+            class="pagination-sm"
+            boundary-links="true"
+            rotate="false"
+            num-pages="ctrl.numPages"
+            ng-change="ctrl.update()">
+        </uib-pagination>
+    </div>
+</div>
+
+<div ng-show="ctrl.showError" class="alert alert-danger" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    {{ctrl.error}}
+</div>
