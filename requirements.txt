@@ -11,3 +11,5 @@ motor  # Apache-2.0
 oauth2>=1.9.0
 jira>=1.0.10
 tlslite>=0.4.9
+pyjwt>=1.5.2
+cryptography>=2.0.3
