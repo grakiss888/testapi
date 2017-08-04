@@ -43,7 +43,7 @@ crudini \
 RUN pip install --upgrade pip
 
 RUN git config --global http.sslVerify false
-RUN git clone https://github.com/grakiss888/testapi.git 
+RUN git clone https://github.com/grakiss888/testapi.git /home/testapi
 
 WORKDIR /home/testapi/
 RUN pip install -r requirements.txt
