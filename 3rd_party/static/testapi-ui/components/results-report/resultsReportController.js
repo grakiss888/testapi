@@ -93,16 +93,24 @@
             result_case.total = 0;
             result_case.pass = 0;
             result_case.fail = 0;
-            if(result_case.details.success){
-                var sub_cases = result_case.details.success.split(',');
-                sub_cases.pop();
+            if(result_case.details.success.length != 0){
+                var sub_cases = result_case.details.success;
+                if(result_case.case_name != 'refstack_defcore'){
+			angular.forEach(sub_cases, function(ele, index){
+			    sub_cases[index] = ele.split(' ')[ele.split(' ').length - 1];
+			});
+                }
                 result_case.details.success = sub_cases;
                 result_case.total += sub_cases.length;
                 result_case.pass += sub_cases.length;
             }
-            if(result_case.details.errors){
-                var sub_cases = result_case.details.errors.split(',');
-                sub_cases.pop();
+            if(result_case.details.errors.length != 0){
+                var sub_cases = result_case.details.errors;
+                if(result_case.case_name != 'refstack_defcore'){
+			angular.forEach(sub_cases, function(ele, index){
+			    sub_cases[index] = ele.split(' ')[ele.split(' ').length - 1];
+			});
+                }
                 result_case.details.errors = sub_cases;
                 result_case.total += sub_cases.length;
                 result_case.fail += sub_cases.length;

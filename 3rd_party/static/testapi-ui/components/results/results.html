@@ -21,6 +21,7 @@
             <tr>
                 <th>Upload Date</th>
                 <th>Test ID</th>
+                <th>Log</th>
                 <th ng-show="ctrl.isUserResults">Operation</th>
             </tr>
         </thead>
@@ -29,6 +30,7 @@
             <tr ng-repeat="(index, result) in ctrl.data.tests">
                 <td>{{ result.upload_date }}</td>
                 <td><a ng-click="ctrl.gotoResultDetail(result.id)">{{ result.id }}</a></td>
+                <td><a ng-click="ctrl.downloadLogs(result.id)">logs</a></td>
                 <td ng-show="ctrl.isUserResults">
                 <label class="hide">
 		<input ng-disabled="auth.currentUser.openid!=result.owner" type="checkbox" ng-true-value="'true'" ng-false-value="'false'" ng-model="result.public" ng-click="ctrl.toggleCheck(result.id, 'public', result.public)"> public

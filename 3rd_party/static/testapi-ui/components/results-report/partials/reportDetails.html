@@ -19,9 +19,9 @@ Test Filters:<br />
             <span class="text-danger">Not Passed</span>
         </label>
     </div>
-    <div class="btn-group button-margin">
-        <button type="button" class="btn btn-default" ng-click="ctrl.openAll()">Unfold</button>
-        <button type="button" class="btn btn-default" ng-click="ctrl.folderAll()">Fold</button>
+    <div class="btn-group button-margin" style="float:right">
+        <button type="button" class="btn btn-default" ng-click="ctrl.openAll()">Expand</button>
+        <button type="button" class="btn btn-default" ng-click="ctrl.folderAll()">Collapse</button>
     </div>
 </div>
 
@@ -38,6 +38,9 @@ Test Filters:<br />
 
             <a ng-click="testcase.folder = !testcase.folder">
                 {{ testcase.build_tag.split('-').pop() }}
+                <span ng-if="ctrl.testStatus == 'total'" ng-class="{'text-success': testcase.total == testcase.pass, 'text-warning': (testcase.pass < testcase.total && testcase.pass > 0), 'text-danger': testcase.pass == 0}">[{{ testcase.pass }}/{{ testcase.total }}]</span>
+                <span ng-if="ctrl.testStatus == 'passed'" class="text-success">[{{ testcase.pass }}]</span>
+                <span ng-if="ctrl.testStatus == 'not passed'" class="text-danger">[{{ testcase.fail }}]</span>
             </a>
 
             <ul class="list-unstyled" uib-collapse="testcase.folder">
@@ -49,12 +52,12 @@ Test Filters:<br />
 
                 <li ng-repeat="sub in testcase.details.success" ng-if="testcase.details.success && ctrl.testStatus != 'not passed'">
                     <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                    <a href="http://artifacts.opnfv.org/dovetail/docs/testing_user_testspecification_highavailability/index.html" target="_blank">{{ sub }}</a>
+                    <a ng-click="ctrl.gotoDoc(sub)">{{ sub }}</a>
                 </li>
 
                 <li ng-repeat="sub in testcase.details.errors" ng-if="testcase.details.errors && ctrl.testStatus != 'passed'">
                     <span class="glyphicon glyphicon-remove text-warning"></span>
-                    <a href="http://artifacts.opnfv.org/dovetail/docs/testing_user_testspecification_highavailability/index.html" target="_blank">{{ sub }}</a>
+                    <a ng-click="ctrl.gotoDoc(sub)">{{ sub }}</a>
                 </li>
             </ul>
         </li>

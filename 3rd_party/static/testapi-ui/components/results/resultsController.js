@@ -62,6 +62,7 @@
         ctrl.prepVersionEdit = prepVersionEdit;
         ctrl.gotoResultDetail = gotoResultDetail;
         ctrl.toggleCheck = toggleCheck;
+        ctrl.downloadLogs = downloadLogs;
 
         /** Mappings of Interop WG components to marketing program names. */
         ctrl.targetMappings = {
@@ -126,6 +127,12 @@
             ctrl.update();
         }
 
+        function downloadLogs(id) {
+            // var logsUrl = testapiApiUrl + "/logs/log_" + id+".tar.gz";
+            var logsUrl = "/logs/" + id+"/results/";
+            window.location.href = logsUrl;
+            // $http.get(logsUrl);
+        }
 
         function toggleCheck(id, item, newValue) {
             var updateUrl = testapiApiUrl + "/tests/"+id;
