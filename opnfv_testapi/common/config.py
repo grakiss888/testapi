@@ -24,6 +24,7 @@ class Config(object):
             os.path.dirname(os.path.normpath(__file__)),
             os.pardir,
             'static')
+        self.base_path = "/home/testapi"
 
     def _parse(self):
         if not os.path.exists(self.config_file):

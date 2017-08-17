@@ -13,6 +13,9 @@ import json
 
 from bson import objectid
 
+
+from tornado import web
+
 from opnfv_testapi.common.config import CONF
 from opnfv_testapi.common import message
 from opnfv_testapi.common import raises
@@ -139,6 +142,22 @@ class TestsCLHandler(GenericTestHandler):
         carriers = []
 
         self._create(miss_fields=miss_fields, carriers=carriers)
+
+class DownloadHandler(web.RequestHandler):
+    @swagger.operation(nickname='downloadLogsById')
+    def get(self, test_id):
+        path = '/home/testapi/logs/'
+        filename = 'log_%s.tar.gz' % (test_id)
+        buf_size = 4096
+        self.set_header('Content-Type', 'application/octet-stream')
+        self.set_header('Content-Disposition', 'attachment; filename=' + filename)
+        with open(path+filename, 'rb') as f:
+            while True:
+                data = f.read(buf_size)
+                if not data:
+                    break
+                self.write(data)
+        self.finish()
 
 
 class TestsGURHandler(GenericTestHandler):

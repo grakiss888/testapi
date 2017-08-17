@@ -10,6 +10,8 @@ import logging
 from datetime import datetime
 from datetime import timedelta
 import json
+import tarfile
+import io
 
 from tornado import gen
 from tornado import web
@@ -244,8 +246,9 @@ class ResultsUploadHandler(ResultsCLHandler):
             @raise 400: body/pod_name/project_name/case_name not provided
         """
         fileinfo = self.request.files['file'][0]
-        logging.info('results is :%s', fileinfo['filename'])
-        results = fileinfo['body'].split('\n')
+        tar_in = tarfile.open(fileobj=io.BytesIO(fileinfo['body']), mode="r:gz")
+        results = tar_in.extractfile('results/results.json').read()
+        results = results.split('\n')
         result_ids = []
         for result in results:
             if result == '':
@@ -255,6 +258,11 @@ class ResultsUploadHandler(ResultsCLHandler):
             _id = yield self._inner_create()
             result_ids.append(str(_id))
         test_id = build_tag[13:49]
+        log_path = '/home/testapi/logs/%s' % (test_id)
+        tar_in.extractall(log_path)
+        log_filename = "/home/testapi/logs/log_%s.tar.gz" % (test_id)
+        with open(log_filename, "wb") as tar_out:
+            tar_out.write(fileinfo['body'])
         resp = {'id': test_id, 'results': result_ids}
         self.finish_request(resp)
 

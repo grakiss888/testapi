@@ -55,6 +55,11 @@ mappings = [
     (r"/api/v1/tests", test_handlers.TestsCLHandler),
     (r"/api/v1/tests/([^/]+)", test_handlers.TestsGURHandler),
 
+    (r"/logs/([^/]+)/results",
+     tornado.web.StaticFileHandler, {"path": CONF.base_path}),
+    #(r"/api/v1/logs/([^/]+)", test_handlers.DownloadHandler),
+    #(r"/api/v1/logs/([^/]+)", tornado.web.StaticFileHandler, {"path": CONF.logs_path}),
+
     # scenarios
     (r"/api/v1/scenarios", scenario_handlers.ScenariosCLHandler),
     (r"/api/v1/scenarios/([^/]+)", scenario_handlers.ScenarioGURHandler),
