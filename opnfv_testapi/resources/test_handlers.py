@@ -66,7 +66,7 @@ class GenericTestHandler(handlers.GenericApiHandler):
                     query['owner'] = openid
                     if role == "reviewer":
                         del query['owner']
-                        query['status'] = {"$ne":"private"}
+                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}}, \                                                                     {"owner": openid}, {"status": {"$ne": "private"}}]
                     else:
                         query['$or'] = [{"shared":{"$elemMatch":{"$eq":openid}}},{"owner":openid}] 
             elif k not in ['last', 'page', 'descend']:
