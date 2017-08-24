@@ -21,8 +21,10 @@
             <tr>
                 <th>Upload Date</th>
                 <th>Test ID</th>
+                <th>Status</th>
                 <th>Log</th>
-                <th ng-show="ctrl.isUserResults">Operation</th>
+                <th>Operation</th>
+                <th>Share List</th>
             </tr>
         </thead>
 
@@ -30,17 +32,34 @@
             <tr ng-repeat="(index, result) in ctrl.data.tests">
                 <td>{{ result.upload_date }}</td>
                 <td><a ng-click="ctrl.gotoResultDetail(result.id)">{{ result.id }}</a></td>
+                <td>{{ result.status }}</td>
                 <td><a ng-click="ctrl.downloadLogs(result.id)">logs</a></td>
-                <td ng-show="ctrl.isUserResults">
-                <label class="hide">
-		<input ng-disabled="auth.currentUser.openid!=result.owner" type="checkbox" ng-true-value="'true'" ng-false-value="'false'" ng-model="result.public" ng-click="ctrl.toggleCheck(result.id, 'public', result.public)"> public
-                </label>
-                <label>
-                <input ng-disabled="auth.currentUser.openid!=result.owner" type="checkbox" ng-true-value="'true'" ng-false-value="'false'" ng-model="result.review" ng-click="ctrl.toggleCheck(result.id, 'review', result.review)"> review
-                </label>
+		<td>
+                    <div class="btn-group" uib-dropdown>
+                        <button id="single-button" type="button" class="btn btn-default btn-sm" uib-dropdown-toggle>
+                            Operation<span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'button-disabled': result.status != 'review'}" ng-click="ctrl.toPrivate(result, 'private')">withdraw submit</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'button-disabled': result.status != 'private'}" ng-click="ctrl.toReview(result, 'review')">submit to review</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'button-disabled': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'button-disabled': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approved')">not approved</a></li>
+                            <li role="menuitem" ><a ng-click="ctrl.openSharedModal(result)">share with</a></li>
+                        </ul>
+                    </div>
                 </td>
-            </tr>
-            <tr>
+                <td>
+                    <div class="btn-group" uib-dropdown>
+                        <button id="single-button" type="button" class="btn btn-default btn-sm" style="width:80px" uib-dropdown-toggle>
+                            Share List<span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button" style="min-width:300%">
+			    <li role="separator" class="divider"></li>
+                            <li role="menuitem" ng-repeat="share in result.shared track by $index"><a>{{ share }}<i class="pull-right glyphicon glyphicon-remove" ng-click="ctrl.removeSharedUser(result, share)"></i></a></li>
+                        </ul>
+                    </div>
+                </td>
+
             </tr>
         </tbody>
     </table>
@@ -65,3 +84,9 @@
     <span class="sr-only">Error:</span>
     {{ctrl.error}}
 </div>
+
+<style>
+.button-disabled {
+    pointer-events:none;
+}
+</style>

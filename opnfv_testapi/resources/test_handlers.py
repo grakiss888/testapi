@@ -15,6 +15,7 @@ from bson import objectid
 
 
 from tornado import web
+from tornado import gen
 
 from opnfv_testapi.common.config import CONF
 from opnfv_testapi.common import message
@@ -24,6 +25,7 @@ from opnfv_testapi.resources import result_handlers
 from opnfv_testapi.resources import test_models
 from opnfv_testapi.tornado_swagger import swagger
 from opnfv_testapi.ui.auth import constants as auth_const
+from opnfv_testapi.db import api as dbapi
 
 
 class GenericTestHandler(handlers.GenericApiHandler):
@@ -44,7 +46,6 @@ class GenericTestHandler(handlers.GenericApiHandler):
     def set_query(self):
         query = dict()
         date_range = dict()
-        query['public'] = {"$not": {"$eq": "false"}}
         for k in self.request.query_arguments.keys():
             v = self.get_query_argument(k)
             if k == 'period':
@@ -62,11 +63,12 @@ class GenericTestHandler(handlers.GenericApiHandler):
                 role = self.get_secure_cookie(auth_const.ROLE)
                 logging.info('role:%s', role)
                 if role:
-                    del query['public']
                     query['owner'] = openid
                     if role == "reviewer":
                         del query['owner']
-                        query['review'] = 'true'
+                        query['status'] = {"$ne":"private"}
+                    else:
+                        query['$or'] = [{"shared":{"$elemMatch":{"$eq":openid}}},{"owner":openid}] 
             elif k not in ['last', 'page', 'descend']:
                 query[k] = v
             if date_range:
@@ -173,11 +175,27 @@ class TestsGURHandler(GenericTestHandler):
             @raise 404: Test not exist
             @raise 403: nothing to update
         """
-        logging.warning('put')
+        data = json.loads(self.request.body)
+        item = data.get('item')
+        value = data.get(item)
+        logging.debug('%s:%s', item, value)
+        try:
+            self.update(test_id, item, value)
+        except Exception as e:
+            logging.error('except:%s', e)
+            return
 
-        item = self.get_body_argument('item')
-        value = self.get_body_argument(item)
-        logging.warning('%s:%s', item, value)
+    @web.asynchronous
+    @gen.coroutine
+    def update(self, test_id, item, value):
+        if item == "shared":
+            for user in value:
+                logging.debug('user:%s', user)
+                query = {"openid":user}
+                data = yield dbapi.db_find_one("users", query)
+                if not data:
+                    logging.debug('not found')
+                    raises.NotFound(message.not_found('users', query))
         self.json_args = {}
         self.json_args[item] = value
         query = {'id': test_id, 'owner': self.get_secure_cookie(auth_const.OPENID)}

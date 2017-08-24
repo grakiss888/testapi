@@ -19,7 +19,7 @@
     angular
         .module('testapiApp', [
             'ui.router','ui.bootstrap', 'cgBusy',
-            'ngResource', 'angular-confirm'
+            'ngResource', 'angular-confirm', 'ngDialog'
         ]);
 
     angular
@@ -157,6 +157,7 @@
         $rootScope.auth.doSignIn = doSignIn;
         $rootScope.auth.doSignOut = doSignOut;
         $rootScope.auth.doSignCheck = doSignCheck;
+        
 
         var sign_in_url = testapiApiUrl + '/auth/signin';
         var sign_out_url = testapiApiUrl + '/auth/signout';
@@ -164,6 +165,7 @@
 
         /** This function initiates a sign in. */
         function doSignIn(type) {
+            $rootScope.auth.type = type;
             $window.location.href = sign_in_url+"?type="+type;
         }
 
@@ -171,7 +173,7 @@
         function doSignOut() {
             $rootScope.auth.currentUser = null;
             $rootScope.auth.isAuthenticated = false;
-            $window.location.href = sign_out_url;
+            $window.location.href = sign_out_url+"?type="+$rootScope.auth.type;
         }
 
         /**
@@ -183,6 +185,7 @@
                 success(function (data) {
                     $rootScope.auth.currentUser = data;
                     $rootScope.auth.isAuthenticated = true;
+                    $rootScope.auth.type = data.type;
                 }).
                 error(function () {
                     $rootScope.auth.currentUser = null;

@@ -1,4 +1,12 @@
-import os
+##############################################################################
+# Copyright (c) 2015 Orange
+# guyrodrigue.koffi@orange.com / koffirodrigue@gmail.com
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+
 
 from six.moves.urllib import parse
 from tornado import gen
@@ -11,18 +19,36 @@ from opnfv_testapi.ui.auth import constants as const
 
 import logging
 import oauth2 as oauth
-from jira import JIRA
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+from cas import CASClient
 
 from opnfv_testapi.ui.auth.jira_util import SignatureMethod_RSA_SHA1
 from opnfv_testapi.ui.auth.jira_util import get_jira
 
+
 class SigninHandler(base.BaseHandler):
     def get(self):
         signin_type = self.get_query_argument("type")
+        self.set_secure_cookie("signin_type", signin_type)
         if signin_type == "openstack":
             self.signin_with_openstack()
         if signin_type == "jira":
             self.signin_with_jira()
+        if signin_type == "cas":
+            self.signin_with_cas()
+
+    def signin_with_cas(self):
+        client = CASClient(
+            version='2',
+            renew=False,
+            extra_login_params=False,
+            server_url='https://identity.linuxfoundation.org/cas/',
+            service_url='http://116.66.187.136:9999/api/v1/auth/signin_return_cas'
+        )
+        redirect_url = client.get_login_url()
+        self.redirect(url=redirect_url, permanent=False)
 
     def signin_with_openstack(self):
         csrf_token = base.get_token()
@@ -46,12 +72,12 @@ class SigninHandler(base.BaseHandler):
         self.redirect(url=url, permanent=False)
 
     def signin_with_jira(self):
-        consumer = oauth.Consumer(CONF.jira_oauth_consumer_key, \
-            CONF.jira_oauth_consumer_secret)
+        consumer = oauth.Consumer(CONF.jira_oauth_consumer_key,
+                                  CONF.jira_oauth_consumer_secret)
         client = oauth.Client(consumer)
         client.set_signature_method(SignatureMethod_RSA_SHA1())
 
-        # Step 1. Get a request token from Jira.                                   
+        # Step 1. Get a request token from Jira.
         try:
             resp, content = client.request(CONF.jira_oauth_request_token_url, "POST")
         except Exception as e:
@@ -68,14 +94,14 @@ class SigninHandler(base.BaseHandler):
 
         # Step 2. Store the request token in a session for later use.
         logging.warning('content is %s', content)
-        request_token = dict(parse.parse_qsl(content.decode())) 
+        request_token = dict(parse.parse_qsl(content.decode()))
         self.set_secure_cookie('oauth_token', request_token['oauth_token'])
         self.set_secure_cookie('oauth_token_secret', request_token['oauth_token_secret'])
 
         # Step 3. Redirect the user to the authentication URL.
         url = CONF.jira_oauth_authorize_url + '?oauth_token=' + \
-              request_token['oauth_token'] + \
-              '&oauth_callback=' + CONF.jira_oauth_callback_url
+            request_token['oauth_token'] + \
+            '&oauth_callback=' + CONF.jira_oauth_callback_url
         self.redirect(url=url, permanent=False)
 
     def _auth_failure(self, message):
@@ -83,6 +109,7 @@ class SigninHandler(base.BaseHandler):
         url = parse.urljoin(CONF.ui_url,
                             '/#/auth_failure?' + parse.urlencode(params))
         self.redirect(url)
+
 
 class SigninReturnHandler(base.BaseHandler):
     @web.asynchronous
@@ -112,12 +139,53 @@ class SigninReturnHandler(base.BaseHandler):
         self.redirect(url=CONF.ui_url)
 
 
+class SigninReturnCasHandler(base.BaseHandler):
+    @web.asynchronous
+    @gen.coroutine
+    def get(self):
+        logging.warning("cas return")
+        ticket = self.get_query_argument('ticket')
+        logging.warning("ticket:%s", ticket)
+        client = CASClient(
+            version='2',
+            renew=False,
+            extra_login_params=False,
+            server_url='https://identity.linuxfoundation.org/cas/',
+            service_url='http://116.66.187.136:9999/api/v1/auth/signin_return_cas'
+        )
+        user, attrs, _ = client.verify_ticket(ticket)
+        logging.debug("user:%s", user)
+        logging.debug("attr:%s", attrs)
+        openid = user
+        role = const.DEFAULT_ROLE
+        new_user_info = {
+            'openid': openid,
+            'email': attrs['mail'],
+            'fullname': attrs['profile_name_full'],
+            const.ROLE: role
+        }
+        user = yield dbapi.db_find_one(self.table, {'openid': openid})
+        if not user:
+            dbapi.db_save(self.table, new_user_info)
+        else:
+            role = user.get(const.ROLE)
+
+        self.clear_cookie(const.OPENID)
+        self.clear_cookie(const.ROLE)
+        self.clear_cookie('ticket')
+        self.set_secure_cookie(const.OPENID, openid)
+        self.set_secure_cookie(const.ROLE, role)
+        self.set_secure_cookie('ticket', ticket)
+
+        self.redirect("/")
+
+
 class SigninReturnJiraHandler(base.BaseHandler):
     @web.asynchronous
     @gen.coroutine
     def get(self):
         logging.warning("jira return")
-        # Step 1. Use the request token in the session to build a new client.   
+        # Step 1. Use the request token in the session to build a new client.
         consumer = oauth.Consumer(CONF.jira_oauth_consumer_key, CONF.jira_oauth_consumer_secret)
         token = oauth.Token(self.get_secure_cookie('oauth_token'),
                             self.get_secure_cookie('oauth_token_secret'))
@@ -136,24 +204,13 @@ class SigninReturnJiraHandler(base.BaseHandler):
         access_token = dict(parse.parse_qsl(content.decode()))
         logging.warning("access_token: %s", access_token)
 
-        module_dir = os.path.dirname(__file__)  # get current directory
-        with open(module_dir + '/rsa.pem', 'r') as f:
-            key_cert = f.read()
-
-        oauth_dict = {
-            'access_token': access_token['oauth_token'],
-            'access_token_secret': access_token['oauth_token_secret'],
-            'consumer_key': CONF.jira_oauth_consumer_key,
-            'key_cert': key_cert
-        }
-
         # jira = JIRA(server=CONF.jira_jira_url, oauth=oauth_dict)
         jira = get_jira(access_token)
-        lf_id= jira.current_user()
+        lf_id = jira.current_user()
         logging.warning("lf_id: %s", lf_id)
         user = jira.myself()
         logging.warning("user: %s", user)
-        # Step 3. Lookup the user or create them if they don't exist.           
+        # Step 3. Lookup the user or create them if they don't exist.
         role = const.DEFAULT_ROLE
         new_user_info = {
             'openid': lf_id,
@@ -173,7 +230,6 @@ class SigninReturnJiraHandler(base.BaseHandler):
         self.set_secure_cookie(const.ROLE, role)
         self.redirect(url=CONF.ui_url)
 
-
     def _auth_failure(self, message):
         params = {'message': message}
         url = parse.urljoin(CONF.ui_url,
@@ -186,7 +242,33 @@ class SignoutHandler(base.BaseHandler):
         """Handle signout request."""
         self.clear_cookie(const.OPENID)
         self.clear_cookie(const.ROLE)
+        signin_type = self.get_secure_cookie("signin_type")
+        if signin_type == "openstack":
+            self.signout_openstack()
+        if signin_type == "jira":
+            self.signout_jira()
+        if signin_type == 'cas':
+            self.signout_cas()
+
+    def signout_openstack(self):
         params = {'openid_logout': CONF.osid_openid_logout_endpoint}
         url = parse.urljoin(CONF.ui_url,
                             '/#/logout?' + parse.urlencode(params))
+        self.redirect(url)
+
+    def signout_jira(self):
+        params = {'alt_token': 'BZTJ-FE10-Z199-1QY6|2abf49ff634766a5560724845916ba484f812685|lin'}
+        url = parse.urljoin(CONF.jira_jira_url,
+                            '/logout?' + parse.urlencode(params))
+        self.redirect(url)
+
+    def signout_cas(self):
+        client = CASClient(
+            version='2',
+            renew=False,
+            extra_login_params=False,
+            server_url='https://identity.linuxfoundation.org/cas/',
+            service_url='http://116.66.187.136:9999/api/v1/auth/signin_return_cas'
+        )
+        url = client.get_logout_url('http://116.66.187.136:9999')
         self.redirect(url)

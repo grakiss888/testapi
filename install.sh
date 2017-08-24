@@ -22,9 +22,7 @@ else
     sed -i -e 's#/etc/opnfv_testapi =#etc/opnfv_testapi =#g' setup.cfg
 fi
 
-cp -fr 3rd_party/static opnfv_testapi/static
 python setup.py install
-rm -fr opnfv_testapi/static
 if [ ! -z "$VIRTUAL_ENV" ]; then
     sed -i -e 's#etc/opnfv_testapi =#/etc/opnfv_testapi =#g' setup.cfg
 fi

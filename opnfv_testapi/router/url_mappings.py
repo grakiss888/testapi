@@ -16,7 +16,6 @@ from opnfv_testapi.resources import result_handlers
 from opnfv_testapi.resources import test_handlers
 from opnfv_testapi.resources import scenario_handlers
 from opnfv_testapi.resources import testcase_handlers
-from opnfv_testapi.ui import root
 from opnfv_testapi.ui.auth import sign
 from opnfv_testapi.ui.auth import user
 
@@ -56,8 +55,8 @@ mappings = [
     (r"/api/v1/tests/([^/]+)", test_handlers.TestsGURHandler),
 
     (r"/logs/([^/]+)/results",
-     tornado.web.StaticFileHandler, {"path": CONF.base_path}),
-    #(r"/api/v1/logs/([^/]+)", test_handlers.DownloadHandler),
+     tornado.web.StaticFileHandler, {"path": CONF.static_path}),
+    (r"/api/v1/logs/([^/]+)", test_handlers.DownloadHandler),
     #(r"/api/v1/logs/([^/]+)", tornado.web.StaticFileHandler, {"path": CONF.logs_path}),
 
     # scenarios
@@ -65,14 +64,15 @@ mappings = [
     (r"/api/v1/scenarios/([^/]+)", scenario_handlers.ScenarioGURHandler),
 
     # static path
-    (r'/(.*\.(css|png|gif|js|html|json|map|woff2|woff|ttf))',
-     tornado.web.StaticFileHandler,
-     {'path': CONF.static_path}),
+    #(r'/(.*\.(css|png|gif|js|html|json|map|woff2|woff|ttf))',
+    # tornado.web.StaticFileHandler,
+    # {'path': CONF.static_path}),
 
-    (r'/', root.RootHandler),
+    #(r'/', root.RootHandler),
     (r'/api/v1/auth/signin', sign.SigninHandler),
     (r'/api/v1/auth/signin_return', sign.SigninReturnHandler),
     (r'/api/v1/auth/signin_return_jira', sign.SigninReturnJiraHandler),
+    (r'/api/v1/auth/signin_return_cas', sign.SigninReturnCasHandler),
     (r'/api/v1/auth/signout', sign.SignoutHandler),
     (r'/api/v1/profile', user.ProfileHandler),
 

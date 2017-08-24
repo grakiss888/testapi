@@ -22,13 +22,17 @@ class TestCreateRequest(models.ModelBase):
                  owner=None,
                  results=[],
                  public="false",
-                 review="false"):
+                 review="false",
+                 status="private",
+                 shared=[]):
         self._id = _id
         self.owner = owner
         self.results = results.copy()
         self.public = public
         self.review = review
         self.upload_date = datetime.now()
+        self.status = status
+        self.shared = shared
 
 
 class ResultUpdateRequest(models.ModelBase):
@@ -46,14 +50,17 @@ class Test(models.ModelBase):
         @property trust_indicator: used for long duration test case
         @ptype trust_indicator: L{TI}
     """
-    def __init__(self, _id=None, owner=None, results=None,
-                 public="false", review="false", trust_indicator=None):
+    def __init__(self, _id=None, owner=None, results=[],
+                 public="false", review="false", status="private",
+                 shared=[], trust_indicator=None):
         self._id = _id
         self.owner = owner
         self.results = results
         self.public = public
         self.review = review
         self.upload_date = datetime.now()
+        self.status = status
+        self.shared = shared
 
 
 @swagger.model()

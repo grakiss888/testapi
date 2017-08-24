@@ -38,7 +38,7 @@
          }]);
 
     ResultsController.$inject = [
-        '$scope', '$http', '$filter', '$state', 'testapiApiUrl','raiseAlert'
+        '$scope', '$http', '$filter', '$state', 'testapiApiUrl','raiseAlert', 'ngDialog', '$resource'
     ];
 
     /**
@@ -46,8 +46,7 @@
      * This controller is for the '/results' page where a user can browse
      * a listing of community uploaded results.
      */
-    function ResultsController($scope, $http, $filter, $state, testapiApiUrl,
-        raiseAlert) {
+    function ResultsController($scope, $http, $filter, $state, testapiApiUrl, raiseAlert, ngDialog, $resource) {
         var ctrl = this;
 
         ctrl.uploadFile=uploadFile;
@@ -62,6 +61,11 @@
         ctrl.prepVersionEdit = prepVersionEdit;
         ctrl.gotoResultDetail = gotoResultDetail;
         ctrl.toggleCheck = toggleCheck;
+        ctrl.toReview = toReview;
+        ctrl.toPrivate = toPrivate;
+        ctrl.removeSharedUser = removeSharedUser;
+        ctrl.addSharedUser = addSharedUser;
+        ctrl.openSharedModal = openSharedModal;
         ctrl.downloadLogs = downloadLogs;
 
         /** Mappings of Interop WG components to marketing program names. */
@@ -97,12 +101,15 @@
         /** The date format for the date picker. */
         ctrl.format = 'yyyy-MM-dd';
 
+	ctrl.userName = null;
+
         /** Check to see if this page should display user-specific results. */
         // ctrl.isUserResults = $state.current.name === 'userResults';
         // need auth to browse
         ctrl.isUserResults = $state.current.name === 'userResults';
 
         ctrl.currentUser = $scope.auth.name;
+        console.log($scope.auth);
 
         // Should only be on user-results-page if authenticated.
         if (ctrl.isUserResults && !$scope.auth.isAuthenticated) {
@@ -134,19 +141,75 @@
             // $http.get(logsUrl);
         }
 
-        function toggleCheck(id, item, newValue) {
-            var updateUrl = testapiApiUrl + "/tests/"+id;
-            var fd = new FormData();
-            fd.append(item, newValue);
-            fd.append('item', item);
+        function toggleCheck(result, item, newValue) {
+            var id = result.id;
+	    var updateUrl = testapiApiUrl + "/tests/"+id;
 
-            $http.put(updateUrl, fd, {
-                 transformRequest: angular.identity,
-                 headers: {'Content-Type': undefined}})
-            .success( function(ret) {
-                 console.log('update success');
+	    var data = {};
+	    data['item'] = item;
+	    data[item] = newValue;
+
+	    $http.put(updateUrl, JSON.stringify(data), {
+	         transformRequest: angular.identity,
+	         headers: {'Content-Type': 'application/json'}})
+	    .then( function(ret) {
+	         result[item] = newValue;
+	         console.log('update success');
+	    }, function(response){
             });
         }
+
+	function toReview(result, value){
+   	    var resp = confirm('Once you submit a test result for review, it will become readable to all CVP reviewers. Do you want to proceed?');
+ 	    if(resp){
+		toggleCheck(result, 'status', value);
+ 	    }
+	}
+
+	function toPrivate(result, value){
+   	    var resp = confirm('Do you want to proceed?');
+ 	    if(resp){
+		toggleCheck(result, 'status', value);
+ 	    }
+	}
+
+	function openSharedModal(result){
+		ctrl.tempResult = result;
+                ngDialog.open({
+                    preCloseCallback: function(value) {
+                    },
+                    template: 'testapi-ui/components/results/modal/sharedModal.html',
+                    scope: $scope,
+                    className: 'ngdialog-theme-default',
+                    width: 950,
+                    showClose: true,
+                    closeByDocument: true
+                });
+	}
+
+	function addSharedUser(result, userId){
+            var tempList = copy(result.shared);
+	    tempList.push(userId);
+	    toggleCheck(result, 'shared', tempList);
+	    ngDialog.close();
+	}
+
+	function removeSharedUser(result, userId){
+	    var tempList = copy(result.shared);
+	    var idx = tempList.indexOf(userId);
+	    if(idx != -1){
+		tempList.splice(idx, 1);
+		toggleCheck(result, 'shared', tempList);
+	    }
+	}
+
+	function copy(arrList){
+	    var tempList = [];
+	    angular.forEach(arrList, function(ele){
+		tempList.push(ele);
+	    });
+	    return tempList;
+	}
 
         function uploadFileToUrl(file, uploadUrl){
             var fd = new FormData();
@@ -209,6 +272,7 @@
                     ctrl.data = data;
                     ctrl.totalItems = ctrl.data.pagination.total_pages * ctrl.itemsPerPage;
                     ctrl.currentPage = ctrl.data.pagination.current_page;
+                    console.log(ctrl.data);
                 }).error(function (error) {
                     ctrl.data = null;
                     ctrl.totalItems = 0;
