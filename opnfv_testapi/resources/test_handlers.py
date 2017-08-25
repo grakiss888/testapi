@@ -11,9 +11,6 @@ from datetime import datetime
 from datetime import timedelta
 import json
 
-from bson import objectid
-
-
 from tornado import web
 from tornado import gen
 
@@ -21,7 +18,6 @@ from opnfv_testapi.common.config import CONF
 from opnfv_testapi.common import message
 from opnfv_testapi.common import raises
 from opnfv_testapi.resources import handlers
-from opnfv_testapi.resources import result_handlers 
 from opnfv_testapi.resources import test_models
 from opnfv_testapi.tornado_swagger import swagger
 from opnfv_testapi.ui.auth import constants as auth_const
@@ -31,8 +27,8 @@ from opnfv_testapi.db import api as dbapi
 class GenericTestHandler(handlers.GenericApiHandler):
     def __init__(self, application, request, **kwargs):
         super(GenericTestHandler, self).__init__(application,
-                                                   request,
-                                                   **kwargs)
+                                                 request,
+                                                 **kwargs)
         self.table = self.db_tests
         self.table_cls = test_models.Test
 
@@ -66,9 +62,11 @@ class GenericTestHandler(handlers.GenericApiHandler):
                     query['owner'] = openid
                     if role == "reviewer":
                         del query['owner']
-                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}}, \                                                                     {"owner": openid}, {"status": {"$ne": "private"}}]
+                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
+                                        {"owner": openid}, {"status": {"$ne": "private"}}]
                     else:
-                        query['$or'] = [{"shared":{"$elemMatch":{"$eq":openid}}},{"owner":openid}] 
+                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
+                                        {"owner": openid}]
             elif k not in ['last', 'page', 'descend']:
                 query[k] = v
             if date_range:
@@ -145,6 +143,7 @@ class TestsCLHandler(GenericTestHandler):
 
         self._create(miss_fields=miss_fields, carriers=carriers)
 
+
 class DownloadHandler(web.RequestHandler):
     @swagger.operation(nickname='downloadLogsById')
     def get(self, test_id):
@@ -153,7 +152,7 @@ class DownloadHandler(web.RequestHandler):
         buf_size = 4096
         self.set_header('Content-Type', 'application/octet-stream')
         self.set_header('Content-Disposition', 'attachment; filename=' + filename)
-        with open(path+filename, 'rb') as f:
+        with open(path + filename, 'rb') as f:
             while True:
                 data = f.read(buf_size)
                 if not data:
@@ -191,7 +190,7 @@ class TestsGURHandler(GenericTestHandler):
         if item == "shared":
             for user in value:
                 logging.debug('user:%s', user)
-                query = {"openid":user}
+                query = {"openid": user}
                 data = yield dbapi.db_find_one("users", query)
                 if not data:
                     logging.debug('not found')
