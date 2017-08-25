@@ -1,0 +1,45 @@
+version: '3'
+services:
+  web:
+    image: opnfv/dovetail:nginx.cvp.0.6.0
+    container_name: web_cvp
+    ports:
+     - "8000:8000"
+    volumes:
+     - /home/testapi/logs:/home/testapi/logs
+    environment:
+     - testapi_url=testapi:8010
+    links:
+     - mongo
+     - testapi
+     - cvpapi
+
+  mongo:
+    image: mongo:3.2.1
+    container_name: mongo_cvp
+    ports:
+     - "27017:27017"
+    volumes:
+     - /home/testapi/mongo/db:/data/db
+
+  testapi:
+    image: opnfv/testapi:cvp.0.5.0
+    container_name: testapi_cvp
+    ports:
+     - "8010:8010"
+    volumes:
+     - /home/testapi/logs:/home/testapi/logs
+    environment:
+     - mongodb_url=mongodb://mongo:27017
+     - base_url=http://116.66.187.136:9999
+
+  cvpapi:
+    image: opnfv/dovetail:api.cvp.0.6.0
+    container_name: cvpapi_cvp
+    ports:
+     - "8011:8011"
+    volumes:
+     - /home/testapi/logs:/home/testapi/logs
+    environment:
+     - mongodb_url=mongodb://mongo:27017
+     - base_url=http://116.66.187.136:9999
