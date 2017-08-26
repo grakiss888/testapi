@@ -86,12 +86,12 @@ echo "Wait for testapi to work..."
 sleep 10
 
 set +e
-nginx_img="opnfv/dovetail:nginx.cvp.0.5.0"
-echo "Step1: pull the image $nginx_img."
-sudo docker pull $nginx_img
+web_img="opnfv/dovetail:web.cvp.0.6.0"
+echo "Step1: pull the image $web_img."
+sudo docker pull $web_img
 set -e
 
-container_name='nginx_cvp'
+container_name='web_cvp'
 
 echo "Step2: remove the exist container with the same name '$container_name' if exists."
 sudo docker ps -a -f "name=${container_name}"
@@ -100,9 +100,9 @@ if [[ ! -z $(sudo docker ps -aq -f "name=${container_name}") ]]; then
     sudo docker ps -aq -f "name=${container_name}" | xargs sudo docker rm -f
 fi
 
-# run nginx container
+# run web container
 echo "Step3: run ${container_name} container."
-cmd="sudo docker run -itd -p 8000:8000 -v /home/testapi/logs:/home/testapi/logs --name ${container_name} -e testapi_url=${db_host_ip}:8010 ${nginx_img}"
+cmd="sudo docker run -itd -p 8000:8000 -v /home/testapi/logs:/home/testapi/logs --name ${container_name} -e testapi_url=${db_host_ip}:8010 ${web_img}"
 echo $cmd
 ${cmd}
 
