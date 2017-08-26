@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: opnfv/dovetail:nginx.cvp.0.6.0
+    image: opnfv/dovetail:web.cvp.0.6.0
     container_name: web_cvp
     ports:
      - "8000:8000"
