@@ -44,8 +44,8 @@ class SigninHandler(base.BaseHandler):
             version='2',
             renew=False,
             extra_login_params=False,
-            server_url='https://identity.linuxfoundation.org/cas/',
-            service_url='http://116.66.187.136:9999/api/v1/auth/signin_return_cas'
+            server_url=CONF.lfid_url,
+            service_url=CONF.lfid_return_url
         )
         redirect_url = client.get_login_url()
         self.redirect(url=redirect_url, permanent=False)
@@ -150,8 +150,8 @@ class SigninReturnCasHandler(base.BaseHandler):
             version='2',
             renew=False,
             extra_login_params=False,
-            server_url='https://identity.linuxfoundation.org/cas/',
-            service_url='http://116.66.187.136:9999/api/v1/auth/signin_return_cas'
+            server_url=CONF.lfid_url,
+            service_url=CONF.lfid_return_url
         )
         user, attrs, _ = client.verify_ticket(ticket)
         logging.debug("user:%s", user)
@@ -267,8 +267,8 @@ class SignoutHandler(base.BaseHandler):
             version='2',
             renew=False,
             extra_login_params=False,
-            server_url='https://identity.linuxfoundation.org/cas/',
-            service_url='http://116.66.187.136:9999/api/v1/auth/signin_return_cas'
+            server_url=CONF.lfid_url,
+            service_url=CONF.lfid_return_url
         )
-        url = client.get_logout_url('http://116.66.187.136:9999')
+        url = client.get_logout_url(CONF.ui_url)
         self.redirect(url)
