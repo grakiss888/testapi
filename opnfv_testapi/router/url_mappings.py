@@ -6,14 +6,13 @@
 # which accompanies this distribution, and is available at
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
-import tornado.web
 
-from opnfv_testapi.common.config import CONF
 from opnfv_testapi.resources import handlers
 from opnfv_testapi.resources import pod_handlers
 from opnfv_testapi.resources import project_handlers
 from opnfv_testapi.resources import result_handlers
 from opnfv_testapi.resources import test_handlers
+from opnfv_testapi.resources import application_handlers
 from opnfv_testapi.resources import scenario_handlers
 from opnfv_testapi.resources import testcase_handlers
 from opnfv_testapi.ui.auth import sign
@@ -54,19 +53,12 @@ mappings = [
     (r"/api/v1/tests", test_handlers.TestsCLHandler),
     (r"/api/v1/tests/([^/]+)", test_handlers.TestsGURHandler),
 
-    (r"/logs/([^/]+)/results",
-     tornado.web.StaticFileHandler, {"path": CONF.static_path}),
-    (r"/api/v1/logs/([^/]+)", test_handlers.DownloadHandler),
-    #(r"/api/v1/logs/([^/]+)", tornado.web.StaticFileHandler, {"path": CONF.logs_path}),
+    (r"/api/v1/cvp/applications", application_handlers.ApplicationsCLHandler),
 
     # scenarios
     (r"/api/v1/scenarios", scenario_handlers.ScenariosCLHandler),
     (r"/api/v1/scenarios/([^/]+)", scenario_handlers.ScenarioGURHandler),
 
-    # static path
-    #(r'/(.*\.(css|png|gif|js|html|json|map|woff2|woff|ttf))',
-    # tornado.web.StaticFileHandler,
-    # {'path': CONF.static_path}),
 
     #(r'/', root.RootHandler),
     (r'/api/v1/auth/signin', sign.SigninHandler),

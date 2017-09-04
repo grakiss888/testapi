@@ -22,6 +22,7 @@
 
 import json
 from datetime import datetime
+from datetime import timedelta
 
 import logging
 from tornado import gen
@@ -33,6 +34,7 @@ from opnfv_testapi.common import raises
 from opnfv_testapi.db import api as dbapi
 from opnfv_testapi.resources import models
 from opnfv_testapi.tornado_swagger import swagger
+from opnfv_testapi.ui.auth import constants as auth_const
 
 DEFAULT_REPRESENTATION = "application/json"
 
@@ -48,8 +50,52 @@ class GenericApiHandler(web.RequestHandler):
         self.db_testcases = 'testcases'
         self.db_results = 'results'
         self.db_scenarios = 'scenarios'
-        self.db_tests = 'tests'
         self.auth = self.settings["auth"]
+
+    def get_int(self, key, value):
+        try:
+            value = int(value)
+        except:
+            raises.BadRequest(message.must_int(key))
+        return value
+
+    def set_query(self):
+        query = dict()
+        date_range = dict()
+        for k in self.request.query_arguments.keys():
+            v = self.get_query_argument(k)
+            if k == 'period':
+                v = self.get_int(k, v)
+                if v > 0:
+                    period = datetime.now() - timedelta(days=v)
+                    obj = {"$gte": str(period)}
+                    query['start_date'] = obj
+            elif k == 'from':
+                date_range.update({'$gte': str(v)})
+            elif k == 'to':
+                date_range.update({'$lt': str(v)})
+            elif k == 'signed':
+                openid = self.get_secure_cookie(auth_const.OPENID)
+                role = self.get_secure_cookie(auth_const.ROLE)
+                logging.info('role:%s', role)
+                if role:
+                    if role == "reviewer":
+                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
+                                        {"owner": openid}, {"status": {"$ne": "private"}}]
+                    else:
+                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
+                                        {"owner": openid}]
+            elif k not in ['last', 'page', 'descend']:
+                query[k] = v
+            if date_range:
+                query['start_date'] = date_range
+
+            # if $lt is not provided,
+            # empty/None/null/'' start_date will also be returned
+            if 'start_date' in query and '$lt' not in query['start_date']:
+                query['start_date'].update({'$lt': str(datetime.now())})
+
+        return query
 
     def prepare(self):
         if self.request.method != "GET" and self.request.method != "DELETE":
@@ -153,6 +199,7 @@ class GenericApiHandler(web.RequestHandler):
                 }
             })
         self.finish_request(res)
+        logging.debug('_list end')
 
     @staticmethod
     def _calc_total_pages(records_count, last, page, per_page):
@@ -201,10 +248,11 @@ class GenericApiHandler(web.RequestHandler):
     @check.not_exist
     @check.updated_one_not_exist
     def _update(self, data, query=None, **kwargs):
+        logging.debug("_update")
         data = self.table_cls.from_dict(data)
         update_req = self._update_requests(data)
-        logging.warning("data:%s", data)
-        logging.warning("update_req:%s", update_req)
+        #logging.debug("data:%s", data)
+        #logging.debug("update_req:%s", update_req)
         yield dbapi.db_update(self.table, query, update_req)
         update_req['_id'] = str(data._id)
         self.finish_request(update_req)

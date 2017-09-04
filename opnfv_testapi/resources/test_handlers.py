@@ -7,8 +7,6 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
 import logging
-from datetime import datetime
-from datetime import timedelta
 import json
 
 from tornado import web
@@ -16,7 +14,6 @@ from tornado import gen
 
 from opnfv_testapi.common.config import CONF
 from opnfv_testapi.common import message
-from opnfv_testapi.common import raises
 from opnfv_testapi.resources import handlers
 from opnfv_testapi.resources import test_models
 from opnfv_testapi.tornado_swagger import swagger
@@ -29,55 +26,8 @@ class GenericTestHandler(handlers.GenericApiHandler):
         super(GenericTestHandler, self).__init__(application,
                                                  request,
                                                  **kwargs)
-        self.table = self.db_tests
+        self.table = "tests"
         self.table_cls = test_models.Test
-
-    def get_int(self, key, value):
-        try:
-            value = int(value)
-        except:
-            raises.BadRequest(message.must_int(key))
-        return value
-
-    def set_query(self):
-        query = dict()
-        date_range = dict()
-        for k in self.request.query_arguments.keys():
-            v = self.get_query_argument(k)
-            if k == 'period':
-                v = self.get_int(k, v)
-                if v > 0:
-                    period = datetime.now() - timedelta(days=v)
-                    obj = {"$gte": str(period)}
-                    query['start_date'] = obj
-            elif k == 'from':
-                date_range.update({'$gte': str(v)})
-            elif k == 'to':
-                date_range.update({'$lt': str(v)})
-            elif k == 'signed':
-                openid = self.get_secure_cookie(auth_const.OPENID)
-                role = self.get_secure_cookie(auth_const.ROLE)
-                logging.info('role:%s', role)
-                if role:
-                    query['owner'] = openid
-                    if role == "reviewer":
-                        del query['owner']
-                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
-                                        {"owner": openid}, {"status": {"$ne": "private"}}]
-                    else:
-                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
-                                        {"owner": openid}]
-            elif k not in ['last', 'page', 'descend']:
-                query[k] = v
-            if date_range:
-                query['start_date'] = date_range
-
-            # if $lt is not provided,
-            # empty/None/null/'' start_date will also be returned
-            if 'start_date' in query and '$lt' not in query['start_date']:
-                query['start_date'].update({'$lt': str(datetime.now())})
-
-        return query
 
 
 class TestsCLHandler(GenericTestHandler):
@@ -118,6 +68,7 @@ class TestsCLHandler(GenericTestHandler):
         }
 
         self._list(query=self.set_query(), **limitations)
+        logging.debug('list end')
 
     @swagger.operation(nickname="createTest")
     def post(self):
@@ -144,25 +95,9 @@ class TestsCLHandler(GenericTestHandler):
         self._create(miss_fields=miss_fields, carriers=carriers)
 
 
-class DownloadHandler(web.RequestHandler):
-    @swagger.operation(nickname='downloadLogsById')
-    def get(self, test_id):
-        path = '/home/testapi/logs/'
-        filename = 'log_%s.tar.gz' % (test_id)
-        buf_size = 4096
-        self.set_header('Content-Type', 'application/octet-stream')
-        self.set_header('Content-Disposition', 'attachment; filename=' + filename)
-        with open(path + filename, 'rb') as f:
-            while True:
-                data = f.read(buf_size)
-                if not data:
-                    break
-                self.write(data)
-        self.finish()
-
-
 class TestsGURHandler(GenericTestHandler):
     @swagger.operation(nickname="updateTestById")
+    @web.asynchronous
     def put(self, test_id):
         """
             @description: update a single test by id
@@ -174,6 +109,7 @@ class TestsGURHandler(GenericTestHandler):
             @raise 404: Test not exist
             @raise 403: nothing to update
         """
+        logging.debug('put')
         data = json.loads(self.request.body)
         item = data.get('item')
         value = data.get(item)
@@ -184,19 +120,65 @@ class TestsGURHandler(GenericTestHandler):
             logging.error('except:%s', e)
             return
 
-    @web.asynchronous
+    #@web.asynchronous
+    @gen.coroutine
+    def check_exist(self, value):
+        logging.debug('check exist begin')
+        for user in value:
+            logging.debug('user:%s', user)
+            query = {"openid": user}
+            data = yield dbapi.db_find_one("users", query)
+            if not data:
+                logging.debug('not found')
+                raise gen.Return((False, message.not_found('users', query)))
+        raise gen.Return((True, ''))
+
     @gen.coroutine
     def update(self, test_id, item, value):
+        logging.debug("update")
         if item == "shared":
-            for user in value:
-                logging.debug('user:%s', user)
-                query = {"openid": user}
-                data = yield dbapi.db_find_one("users", query)
-                if not data:
-                    logging.debug('not found')
-                    raises.NotFound(message.not_found('users', query))
+            ret, msg = yield self.check_exist(value)
+            logging.debug('ret:%s', ret)
+            if not ret:
+                self.finish_request({'code': '404', 'msg': msg})
+                return
+
+        logging.debug("before _update")
         self.json_args = {}
         self.json_args[item] = value
-        query = {'id': test_id, 'owner': self.get_secure_cookie(auth_const.OPENID)}
-        db_keys = ['id', 'owner']
+        ret, msg = yield self.check_auth(item, value)
+        if not ret:
+            self.finish_request({'code': '404', 'msg': msg})
+            return
+
+        query = {'id': test_id}
+        db_keys = ['id', ]
+        user = self.get_secure_cookie(auth_const.OPENID)
+        if item == "shared":
+            query['owner'] = user
+            db_keys.append('owner')
+        logging.debug("before _update 2")
         self._update(query=query, db_keys=db_keys)
+
+    @gen.coroutine
+    def check_auth(self, item, value):
+        logging.debug('check_auth')
+        user = self.get_secure_cookie(auth_const.OPENID)
+        query = {}
+        if item == "status":
+            if value == "private" or value == "review":
+                logging.debug('check review')
+                query['user_id'] = user
+                data = yield dbapi.db_find_one('applications', query)
+                if not data:
+                    logging.debug('not found')
+                    raise gen.Return((False, message.no_auth()))
+            if value == "approve" or value == "not approved":
+                logging.debug('check approve')
+                query['role'] = 'reviewer'
+                query['openid'] = user
+                data = yield dbapi.db_find_one('users', query)
+                if not data:
+                    logging.debug('not found')
+                    raise gen.Return((False, message.no_auth()))
+        raise gen.Return((True, {}))

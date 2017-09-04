@@ -57,6 +57,12 @@ server {
             autoindex_localtime on;
         }
 
+        location /api/v1/cvp {
+            proxy_pass http://cvpapi/api/v1/cvp;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header Host $host;
+        }
+
         location /api/v1/auth {
             proxy_pass http://cvpapi/api/v1/auth;
             proxy_set_header X-Real-IP $remote_addr;

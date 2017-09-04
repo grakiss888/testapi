@@ -153,8 +153,13 @@
 	         transformRequest: angular.identity,
 	         headers: {'Content-Type': 'application/json'}})
 	    .then( function(ret) {
-	         result[item] = newValue;
-	         console.log('update success');
+                 if(ret.data.code && ret.data.code != 0) {
+                     alert(ret.data.msg);
+                 }
+                 else {
+	             result[item] = newValue;
+	             console.log('update success');
+                 }
 	    }, function(response){
             });
         }

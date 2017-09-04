@@ -37,7 +37,8 @@
         $stateProvider.
             state('home', {
                 url: '/',
-                templateUrl: 'testapi-ui/components/home/home.html'
+                templateUrl: 'testapi-ui/components/home/home.html',
+                controller: 'HomeController as ctrl'
             }).
             state('about', {
                 url: '/about',
@@ -113,6 +114,11 @@
                 url: '/cloud/:id',
                 templateUrl: '/testapi-ui/components/products/cloud.html',
                 controller: 'ProductController as ctrl'
+            }).
+	    state('application', {
+                url: '/application',
+                templateUrl: '/testapi-ui/components/application/application.html',
+                controller: 'ApplicationController as ctrl'
             }).
             state('distro', {
                 url: '/distro/:id',

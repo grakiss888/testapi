@@ -48,3 +48,7 @@ def no_update():
 
 def must_int(name):
     return '{} must be int'.format(name)
+
+
+def no_auth():
+    return 'No permission to operate. Please ask Administrator for details.'

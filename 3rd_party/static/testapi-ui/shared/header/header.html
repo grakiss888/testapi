@@ -33,6 +33,7 @@ CVP
             -->
           </ul>
           <ul class="nav navbar-nav navbar-right">
+            <li ng-class="{ active: header.isActive('/application')}" ng-if="auth.isAuthenticated"><a ui-sref="application">Applications</a></li>
             <li ng-class="{ active: header.isActive('/user_results')}" ng-if="auth.isAuthenticated"><a ui-sref="userResults">My Results</a></li>
             <!--
             <li ng-if="auth.isAuthenticated" ng-class="{ active: header.isCatalogActive('user')}" class="dropdown" uib-dropdown>
