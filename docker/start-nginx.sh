@@ -7,4 +7,4 @@ fi
 
 service supervisor start
 
-tail -f /var/log/supervisor/nginx.log
+tail -f /var/log/supervisor/supervisord.log
