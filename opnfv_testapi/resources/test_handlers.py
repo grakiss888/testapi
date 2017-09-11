@@ -71,6 +71,7 @@ class TestsCLHandler(GenericTestHandler):
         logging.debug('list end')
 
     @swagger.operation(nickname="createTest")
+    @web.asynchronous
     def post(self):
         """
             @description: create a test
@@ -88,9 +89,15 @@ class TestsCLHandler(GenericTestHandler):
 
         self._post()
 
+    @gen.coroutine
     def _post(self):
         miss_fields = []
         carriers = []
+        query = {'owner': self.json_args['owner'], 'id': self.json_args['id']}
+        ret, msg = yield self._check_if_exists(table="tests", query=query)
+        if ret:
+            self.finish_request({'code': '403', 'msg': msg})
+            return
 
         self._create(miss_fields=miss_fields, carriers=carriers)
 
@@ -120,27 +127,22 @@ class TestsGURHandler(GenericTestHandler):
             logging.error('except:%s', e)
             return
 
-    #@web.asynchronous
-    @gen.coroutine
-    def check_exist(self, value):
-        logging.debug('check exist begin')
-        for user in value:
-            logging.debug('user:%s', user)
-            query = {"openid": user}
-            data = yield dbapi.db_find_one("users", query)
-            if not data:
-                logging.debug('not found')
-                raise gen.Return((False, message.not_found('users', query)))
-        raise gen.Return((True, ''))
-
     @gen.coroutine
     def update(self, test_id, item, value):
         logging.debug("update")
         if item == "shared":
-            ret, msg = yield self.check_exist(value)
+            if len(value) != len(set(value)):
+                msg = "Already shared with this user"
+                self.finish_request({'code': '403', 'msg': msg})
+                return
+
+            for user in value:
+                query = {"openid": user}
+                table = "users"
+            ret, msg = yield self._check_if_exists(table=table, query=query)
             logging.debug('ret:%s', ret)
             if not ret:
-                self.finish_request({'code': '404', 'msg': msg})
+                self.finish_request({'code': '403', 'msg': msg})
                 return
 
         logging.debug("before _update")

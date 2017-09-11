@@ -164,6 +164,16 @@ class GenericApiHandler(web.RequestHandler):
 
         self.finish_request(self._create_response(resource))
 
+    @gen.coroutine
+    def _check_if_exists(self, *args, **kwargs):
+        query = kwargs['query']
+        table = kwargs['table']
+        if query and table:
+            data = yield dbapi.db_find_one(table, query)
+            if data:
+                raise gen.Return((True, 'Data alreay exists. %s' % (query)))
+        raise gen.Return((False, 'Data does not exist. %s' % (query)))
+
     @web.asynchronous
     @gen.coroutine
     def _list(self, query=None, res_op=None, *args, **kwargs):

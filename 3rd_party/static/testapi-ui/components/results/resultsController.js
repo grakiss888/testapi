@@ -233,7 +233,11 @@
                 fd.append('id',data.id);
                 $http.post(createTestUrl, data)
                 .success(function(data){
-                  ctrl.update();
+                  if (data.code != 0) {
+                    alert(data.msg);
+                  } else {
+                    ctrl.update();
+                  }
                 });
              })
 
