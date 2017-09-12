@@ -11,6 +11,7 @@ import json
 
 from tornado import web
 from tornado import gen
+from bson import objectid
 
 from opnfv_testapi.common.config import CONF
 from opnfv_testapi.common import message
@@ -103,6 +104,18 @@ class TestsCLHandler(GenericTestHandler):
 
 
 class TestsGURHandler(GenericTestHandler):
+
+    @swagger.operation(nickname="getTestById")
+    def get(self, test_id):
+        query = dict()
+        query["_id"] = objectid.ObjectId(test_id)
+        self._get_one(query=query)
+
+    @swagger.operation(nickname="deleteTestById")
+    def delete(self, test_id):
+        query = {'_id': objectid.ObjectId(test_id)}
+        self._delete(query=query)
+
     @swagger.operation(nickname="updateTestById")
     @web.asynchronous
     def put(self, test_id):

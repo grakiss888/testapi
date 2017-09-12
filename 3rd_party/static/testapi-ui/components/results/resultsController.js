@@ -67,6 +67,7 @@
         ctrl.addSharedUser = addSharedUser;
         ctrl.openSharedModal = openSharedModal;
         ctrl.downloadLogs = downloadLogs;
+        ctrl.deleteTest = deleteTest;
 
         /** Mappings of Interop WG components to marketing program names. */
         ctrl.targetMappings = {
@@ -139,6 +140,29 @@
             var logsUrl = "/logs/" + id+"/results/";
             window.location.href = logsUrl;
             // $http.get(logsUrl);
+        }
+
+        function deleteTest(inner_id) {
+          var resp = confirm('Are you sure to delete this test?');
+          if (!resp)
+            return;
+
+          var delUrl = testapiApiUrl + "/tests/" + inner_id;
+          $http.get(delUrl)
+            .then( function(resp) {
+              var results = resp.data.results;
+              $http.delete(delUrl)
+                .then( function(ret) {
+                  if(ret.data.code && ret.data.code != 0) {
+                    alert(ret.data.msg);
+                  }
+                  ctrl.update();
+                  angular.forEach(results, function(ele) {
+                    delUrl = testapiApiUrl + "/results/" + ele;
+                    $http.delete(delUrl);
+                  });
+                });
+            });
         }
 
         function toggleCheck(result, item, newValue) {
@@ -224,7 +248,6 @@
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
             })
-
             .success(function(data){
                 ctrl.uploadState = "";
                 var createTestUrl = testapiApiUrl + "/tests"
@@ -232,8 +255,8 @@
                 fd.append('results',data.results);
                 fd.append('id',data.id);
                 $http.post(createTestUrl, data)
-                .success(function(data){
-                  if (data.code != 0) {
+                .success(function(data, status){
+                  if (data.code && data.code != 0) {
                     alert(data.msg);
                   } else {
                     ctrl.update();
@@ -469,8 +492,8 @@
 
 
 
-        function gotoResultDetail(testId) {
-            $state.go('resultsDetail', {'testID': testId});
+        function gotoResultDetail(testId, innerID) {
+            $state.go('resultsDetail', {'testID': testId, 'innerID': innerID});
         }
 
     }

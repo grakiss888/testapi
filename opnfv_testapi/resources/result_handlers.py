@@ -268,6 +268,11 @@ class ResultsUploadHandler(ResultsCLHandler):
 
 
 class ResultsGURHandler(GenericResultHandler):
+    @swagger.operation(nickname='DeleteTestResultById')
+    def delete(self, result_id):
+        query = {'_id': objectid.ObjectId(result_id)}
+        self._delete(query=query)
+
     @swagger.operation(nickname='getTestResultById')
     def get(self, result_id):
         """

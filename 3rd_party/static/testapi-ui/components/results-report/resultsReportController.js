@@ -41,6 +41,7 @@
 
         /** The testID extracted from the URL route. */
         ctrl.testId = $stateParams.testID;
+        ctrl.innerId = $stateParams.innerID;
 
         /** The HTML template that all accordian groups will use. */
         ctrl.detailsTemplate = 'testapi-ui/components/results-report/partials/' +
@@ -65,20 +66,18 @@
          */
         function getResults() {
             ctrl.cases = [];
-            $http.get(testapiApiUrl + '/projects/dovetail/cases').success(function(case_name_data){
-                var case_name_list = case_name_data.testcases;
-                angular.forEach(case_name_list, function(ele){
-                    var content_url = testapiApiUrl + '/results?build_tag=' + 'daily-master-' + ctrl.testId + '-' + ele.name;
+            $http.get(testapiApiUrl + '/tests/' + ctrl.innerId).success(function(test_data){
+                var results = test_data.results;
+                angular.forEach(results, function(ele){
+                    var content_url = testapiApiUrl + '/results/' + ele;
                     ctrl.resultsRequest =
                         $http.get(content_url).success(function(data) {
-                            var result_cases = data.results;
-                            angular.forEach(result_cases, function(result_case){
-                                if(result_case.project_name == 'yardstick'){
-                                    yardstickHandler(result_case);
-                                }else{
-                                    functestHandler(result_case);
-                                }
-                            });
+                            var result_case = data;
+                            if(result_case.project_name == 'yardstick'){
+                                yardstickHandler(result_case);
+                            }else{
+                                functestHandler(result_case);
+                            }
                         }).error(function (error) {
                             ctrl.showError = true;
                             ctrl.resultsData = null;
@@ -93,7 +92,7 @@
             result_case.total = 0;
             result_case.pass = 0;
             result_case.fail = 0;
-            if(result_case.details.success.length != 0){
+            if(result_case.details.success && result_case.details.success.length != 0){
                 var sub_cases = result_case.details.success;
                 if(result_case.case_name != 'refstack_defcore'){
 			angular.forEach(sub_cases, function(ele, index){
@@ -104,7 +103,7 @@
                 result_case.total += sub_cases.length;
                 result_case.pass += sub_cases.length;
             }
-            if(result_case.details.errors.length != 0){
+            if(result_case.details.errors && result_case.details.errors.length != 0){
                 var sub_cases = result_case.details.errors;
                 if(result_case.case_name != 'refstack_defcore'){
 			angular.forEach(sub_cases, function(ele, index){

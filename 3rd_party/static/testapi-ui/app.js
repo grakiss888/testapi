@@ -61,7 +61,7 @@
                 controller: 'ResultsController as ctrl'
             }).
             state('resultsDetail', {
-                url: '/results/:testID',
+                url: '/results/:testID&:innerID',
                 templateUrl: 'testapi-ui/components/results-report' +
                              '/resultsReport.html',
                 controller: 'ResultsReportController as ctrl'
