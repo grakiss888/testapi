@@ -40,10 +40,10 @@
                             Operation<span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'button-disabled': result.status != 'review'}" ng-click="ctrl.toPrivate(result, 'private')">withdraw submit</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'button-disabled': result.status != 'private'}" ng-click="ctrl.toReview(result, 'review')">submit to review</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'button-disabled': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'button-disabled': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approved')">not approved</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'hide': result.status != 'review'}" ng-click="ctrl.toPrivate(result, 'private')">withdraw submit</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'hide': result.status != 'private'}" ng-click="ctrl.toReview(result, 'review')">submit to review</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'hide': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'hide': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approved')">not approved</a></li>
                             <li role="menuitem" ><a ng-click="ctrl.openSharedModal(result)">share with</a></li>
                             <li role="menuitem" ng-if="auth.currentUser.openid == result.owner" ><a ng-click="ctrl.deleteTest(result._id)">delete</a></li>
                         </ul>
