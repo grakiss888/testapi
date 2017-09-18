@@ -36,8 +36,10 @@
 		ctrl.organization_web = null;
 		ctrl.product_name = null;
 		ctrl.product_documentation = null;
-		ctrl.product_categories = null;
+		ctrl.product_categories = "soft&hard";
 		ctrl.user_id = null;
+                ctrl.lab_location="internal";
+                ctrl.lab_email=null;
 		ctrl.applications = [];
 		ctrl.showApplications = [];
 

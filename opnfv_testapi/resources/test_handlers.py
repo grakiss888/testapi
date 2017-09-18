@@ -152,11 +152,11 @@ class TestsGURHandler(GenericTestHandler):
             for user in value:
                 query = {"openid": user}
                 table = "users"
-            ret, msg = yield self._check_if_exists(table=table, query=query)
-            logging.debug('ret:%s', ret)
-            if not ret:
-                self.finish_request({'code': '403', 'msg': msg})
-                return
+                ret, msg = yield self._check_if_exists(table=table, query=query)
+                logging.debug('ret:%s', ret)
+                if not ret:
+                    self.finish_request({'code': '403', 'msg': msg})
+                    return
 
         logging.debug("before _update")
         self.json_args = {}

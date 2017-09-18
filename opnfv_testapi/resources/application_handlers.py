@@ -69,6 +69,7 @@ class ApplicationsCLHandler(GenericApplicationHandler):
         logging.debug('list end')
 
     @swagger.operation(nickname="createApplication")
+    @web.asynchronous
     def post(self):
         """
             @description: create a application
@@ -86,9 +87,18 @@ class ApplicationsCLHandler(GenericApplicationHandler):
 
         self._post()
 
+    @gen.coroutine
     def _post(self):
         miss_fields = []
         carriers = []
+
+        query = {"openid": self.json_args['user_id']}
+        table = "users"
+        ret, msg = yield self._check_if_exists(table=table, query=query)
+        logging.debug('ret:%s', ret)
+        if not ret:
+            self.finish_request({'code': '403', 'msg': msg})
+            return
 
         self._create(miss_fields=miss_fields, carriers=carriers)
 
