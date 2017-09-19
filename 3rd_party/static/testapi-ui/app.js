@@ -177,6 +177,9 @@
 
         /** This function will initate a sign out. */
         function doSignOut() {
+            resp = confirm("Do you want to sign out?");
+            if (!resp)
+                return;
             $rootScope.auth.currentUser = null;
             $rootScope.auth.isAuthenticated = false;
             $window.location.href = sign_out_url+"?type="+$rootScope.auth.type;

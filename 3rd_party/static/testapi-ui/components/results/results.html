@@ -3,10 +3,10 @@
 <form class="form-inline" ng-show="ctrl.isUserResults">
 <h4>Upload Results</h4>
 <div class="form-group col-m-3">
-     <input class="form-contrl btn btn-default" type = "file" file-model = "resultFile"/>
+     <input class="form-contrl nectar-button medium accent-color regular-button" type = "file" file-model = "resultFile"/>
 </div>
 <div class="form-group col-m-3">
-     <button class="btn btn-primary" ng-click = "ctrl.uploadFile()">upload result</button>
+     <a class="nectar-button medium accent-color regular-button" ng-click="ctrl.uploadFile()"><span>upload result</span></a>
 </div>
 <div>
 <lable>{{ctrl.uploadState}}</label>
@@ -23,8 +23,8 @@
                 <th>Test ID</th>
                 <th>Status</th>
                 <th>Log</th>
-                <th>Operation</th>
-                <th>Share List</th>
+                <th class="col-md-2">Operation</th>
+                <th class="col-md-2">Share List</th>
             </tr>
         </thead>
 
@@ -36,27 +36,26 @@
                 <td><a ng-click="ctrl.downloadLogs(result.id)">logs</a></td>
 		<td>
                     <div class="btn-group" uib-dropdown>
-                        <button id="single-button" type="button" class="btn btn-default btn-sm" uib-dropdown-toggle>
+                        <a id="single-button" type="button" class="nectar-button medium accent-color regular-button" uib-dropdown-toggle>
                             Operation<span class="caret"></span>
-                        </button>
+                        </a>
                         <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'hide': result.status != 'review'}" ng-click="ctrl.toPrivate(result, 'private')">withdraw submit</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" ><a ng-class="{'hide': result.status != 'private'}" ng-click="ctrl.toReview(result, 'review')">submit to review</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'hide': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" ><a ng-class="{'hide': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approved')">not approved</a></li>
-                            <li role="menuitem" ><a ng-click="ctrl.openSharedModal(result)">share with</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.openid == result.owner" ><a ng-click="ctrl.deleteTest(result._id)">delete</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status != 'review'}" ng-click="ctrl.toPrivate(result, 'private')">withdraw submit</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'user'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status != 'private'}" ng-click="ctrl.toReview(result, 'review')">submit to review</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approved')">not approved</a></li>
+                            <li role="menuitem" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-click="ctrl.openSharedModal(result)">share with</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.openid == result.owner" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-click="ctrl.deleteTest(result._id)">delete</a></li>
                         </ul>
                     </div>
                 </td>
                 <td>
                     <div class="btn-group" uib-dropdown>
-                        <button id="single-button" type="button" class="btn btn-default btn-sm" style="width:80px" uib-dropdown-toggle>
+                        <a id="single-button" type="button" class="nectar-button medium accent-color regular-button" style="width:130px" uib-dropdown-toggle>
                             Share List<span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button" style="min-width:300%">
-			    <li role="separator" class="divider"></li>
-                            <li role="menuitem" ng-repeat="share in result.shared track by $index"><a>{{ share }}<i class="pull-right glyphicon glyphicon-remove" ng-click="ctrl.removeSharedUser(result, share)"></i></a></li>
+                        </a>
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button" style="min-width:150%">
+                            <li class="menu-item menu-item-type-post_type menu-item-object-page" role="menuitem" ng-repeat="share in result.shared track by $index"><span>{{ share }}<i class="pull-right glyphicon glyphicon-remove" ng-click="ctrl.removeSharedUser(result, share)"></i></span></li>
                         </ul>
                     </div>
                 </td>
@@ -79,7 +78,7 @@
         </uib-pagination>
     </div>
 </div>
-
+</div>
 <div ng-show="ctrl.showError" class="alert alert-danger" role="alert">
     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
     <span class="sr-only">Error:</span>
@@ -90,4 +89,3 @@
 .button-disabled {
     pointer-events:none;
 }
-</style>
