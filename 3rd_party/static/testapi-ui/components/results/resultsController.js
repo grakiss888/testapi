@@ -297,13 +297,14 @@
                 content_url = content_url + '&to=' + end + ' 23:59:59';
             }
             if (ctrl.isUserResults) {
-                content_url = content_url + '&signed';
+                content_url = content_url + '&signed'+'&per_page='+ ctrl.itemsPerPage;
             }
             ctrl.resultsRequest =
                 $http.get(content_url).success(function (data) {
                     ctrl.data = data;
                     ctrl.totalItems = ctrl.data.pagination.total_pages * ctrl.itemsPerPage;
                     ctrl.currentPage = ctrl.data.pagination.current_page;
+                    ctrl.numPages = ctrl.data.pagination.total_pages;
                     console.log(ctrl.data);
                 }).error(function (error) {
                     ctrl.data = null;

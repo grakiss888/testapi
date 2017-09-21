@@ -85,7 +85,7 @@ class GenericApiHandler(web.RequestHandler):
                     else:
                         query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
                                         {"owner": openid}]
-            elif k not in ['last', 'page', 'descend']:
+            elif k not in ['last', 'page', 'descend', 'per_page']:
                 query[k] = v
             if date_range:
                 query['start_date'] = date_range
@@ -95,6 +95,7 @@ class GenericApiHandler(web.RequestHandler):
             if 'start_date' in query and '$lt' not in query['start_date']:
                 query['start_date'].update({'$lt': str(datetime.now())})
 
+        logging.debug("query:%s", query)
         return query
 
     def prepare(self):
@@ -213,6 +214,7 @@ class GenericApiHandler(web.RequestHandler):
 
     @staticmethod
     def _calc_total_pages(records_count, last, page, per_page):
+        logging.debug("totalItems:%d per_page:%d", records_count, per_page)
         records_nr = records_count
         if (records_count > last) and (last > 0):
             records_nr = last

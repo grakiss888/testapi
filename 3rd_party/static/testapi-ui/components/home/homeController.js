@@ -35,7 +35,7 @@
 		if($rootScope.auth.isAuthenticated){
 			$state.go('application');
 		}else{
-			$state.go('authPortal');
+			$rootScope.auth.doSignIn('cas');
 		}
 	}
     }

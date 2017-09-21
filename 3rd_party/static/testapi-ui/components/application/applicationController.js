@@ -86,23 +86,15 @@
 	}
 
 	ctrl.updatePage = function(){
-		ctrl.showApplications = ctrl.applications.slice(ctrl.itemsPerPage * (ctrl.currentPage - 1), ctrl.itemsPerPage * ctrl.currentPage);
-	}
-
-	function pageCount(){
-		ctrl.totalItems = ctrl.applications.length;
-		if(ctrl.totalItems % ctrl.itemsPerPage != 0){
-			ctrl.numPages = ctrl.totalItems / ctrl.itemsPerPage + 1;
-		}else{
-			ctrl.numPages = ctrl.totalItems / ctrl.itemsPerPage;
-		}
+            getApplication();
 	}
 
 	function getApplication(){
-		$http.get(testapiApiUrl + "/cvp/applications").then(function(response){
+		$http.get(testapiApiUrl + "/cvp/applications?page="+ctrl.currentPage+"&signed&per_page="+ctrl.itemsPerPage).then(function(response){
 			ctrl.applications = response.data.applications;
-			pageCount();
-			ctrl.showApplications = ctrl.applications.slice(0, ctrl.itemsPerPage);
+                        ctrl.totalItems = response.data.pagination.total_pages* ctrl.itemsPerPage;
+                        ctrl.currentPage = response.data.pagination.current_page;
+                        ctrl.numPages = response.data.pagination.total_pages;
 		}, function(error){
 		});
 	}
