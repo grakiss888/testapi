@@ -65,7 +65,7 @@
          * the function that gets the version list will be called.
          */
         function getResults() {
-            ctrl.cases = [];
+            ctrl.cases = {};
             $http.get(testapiApiUrl + '/tests/' + ctrl.innerId).success(function(test_data){
                 var results = test_data.results;
                 angular.forEach(results, function(ele){
@@ -78,7 +78,10 @@
                             }else{
                                 functestHandler(result_case);
                             }
-                        }).error(function (error) {
+                            result_case.folder = true;
+                            ctrl.cases[result_case._id] = result_case;
+                            count(result_case);
+                       }).error(function (error) {
                             ctrl.showError = true;
                             ctrl.resultsData = null;
                             ctrl.error = 'Error retrieving results from server: ' +
@@ -122,9 +125,6 @@
                     result_case.fail = 1;
                 }
             }
-            result_case.folder = true;
-            ctrl.cases.push(result_case);
-            count(result_case);
         }
 
         function yardstickHandler(result_case){
@@ -144,9 +144,6 @@
                     return false;
                 }
             });
-            result_case.folder = true;
-            ctrl.cases.push(result_case);
-            count(result_case);
         }
 
         function count(result_case){
@@ -168,13 +165,13 @@
         }
 
         function openAll(){
-            angular.forEach(ctrl.cases, function(ele){
+            angular.forEach(ctrl.cases, function(id, ele){
                 ele.folder = false;
             });
         }
 
         function folderAll(){
-            angular.forEach(ctrl.cases, function(ele){
+            angular.forEach(ctrl.cases, function(id, ele){
                 ele.folder = true;
             });
         }

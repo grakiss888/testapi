@@ -13,9 +13,6 @@
 <strong>Total: {{ctrl.total}}, Pass: {{ ctrl.mandatory_pass + ctrl.optional_pass }}, Rate: {{ (ctrl.mandatory_pass + ctrl.optional_pass) / ctrl.total * 100 | number:2 }}%</strong></br>
 <strong>Mandatory Total: {{ctrl.mandatory_total}}, Pass: {{ ctrl.mandatory_pass }}, Rate: {{ ctrl.mandatory_pass / ctrl.mandatory_total * 100 | number:2 }}%</strong></br>
 <strong>Optional Total: {{ctrl.optional_total}}, Pass: {{ ctrl.optional_pass }}, Rate: {{ ctrl.optional_pass / ctrl.optional_total * 100 | number:2 }}%</strong></br>
-<strong ng-show="ctrl.mandatory_total == ctrl.mandatory_pass && ctrl.mandatory_total != 0">Status: Success</strong>
-<strong ng-show="ctrl.mandatory_total != ctrl.mandatory_pass && ctrl.mandatory_total != 0">Status: Failed</strong>
-<strong ng-show="ctrl.mandatory_total == 0">Status: N/A</strong>
 
 <div ng-show="ctrl.cases">
     <hr >
