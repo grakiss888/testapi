@@ -155,6 +155,7 @@
                 .then( function(ret) {
                   if(ret.data.code && ret.data.code != 0) {
                     alert(ret.data.msg);
+                    return;
                   }
                   ctrl.update();
                   angular.forEach(results, function(ele) {

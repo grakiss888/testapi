@@ -70,9 +70,12 @@
                     "lab_phone": ctrl.lab_phone
 		};
 		console.log(data);
-		$http.post(testapiApiUrl + "/cvp/applications", data).then(function(response){
-			//ngDialog.close();
-			getApplication();
+		$http.post(testapiApiUrl + "/cvp/applications", data).then(function(resp){
+                    if(resp.data.code && resp.data.code != 0) {
+                        alert(ret.data.msg);
+                        return;
+                    }  
+                    getApplication();
 		}, function(error){
 		});
 	}
@@ -102,6 +105,7 @@
           .then( function(ret) {
               if(ret.data.code && ret.data.code != 0) {
                     alert(ret.data.msg);
+                    return;
               }
               getApplication();
           });
