@@ -12,6 +12,10 @@ from six.moves.urllib import parse
 from tornado import gen
 from tornado import web
 
+from cas import CASClient
+from opnfv_testapi.ui.auth.jira_util import SignatureMethod_RSA_SHA1
+from opnfv_testapi.ui.auth.jira_util import get_jira
+
 from opnfv_testapi.common.config import CONF
 from opnfv_testapi.db import api as dbapi
 from opnfv_testapi.ui.auth import base
@@ -22,10 +26,6 @@ import oauth2 as oauth
 
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
-from cas import CASClient
-
-from opnfv_testapi.ui.auth.jira_util import SignatureMethod_RSA_SHA1
-from opnfv_testapi.ui.auth.jira_util import get_jira
 
 
 class SigninHandler(base.BaseHandler):

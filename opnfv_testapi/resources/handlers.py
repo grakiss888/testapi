@@ -263,8 +263,6 @@ class GenericApiHandler(web.RequestHandler):
         logging.debug("_update")
         data = self.table_cls.from_dict(data)
         update_req = self._update_requests(data)
-        #logging.debug("data:%s", data)
-        #logging.debug("update_req:%s", update_req)
         yield dbapi.db_update(self.table, query, update_req)
         update_req['_id'] = str(data._id)
         self.finish_request(update_req)
@@ -316,5 +314,5 @@ class VersionHandler(GenericApiHandler):
             @description: list all supported versions
             @rtype: L{Versions}
         """
-        versions = [{'version': 'v1.0', 'description': 'basics'}]
+        versions = [{'version': 'api.cvp.0.6.2', 'description': 'basics'}]
         self.finish_request({'versions': versions})
