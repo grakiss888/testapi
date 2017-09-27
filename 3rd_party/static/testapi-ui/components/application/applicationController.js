@@ -20,13 +20,13 @@
         .controller('ApplicationController', ApplicationController);
 
     ApplicationController.$inject = [
-        '$http', '$stateParams', '$window',
+        '$http', '$stateParams', '$window', '$sce',
         '$uibModal', 'testapiApiUrl', 'raiseAlert', 'ngDialog', '$scope'
     ];
 
     /**
      */
-    function ApplicationController($http, $stateParams, $window,
+    function ApplicationController($http, $stateParams, $window, $sce,
         $uibModal, testapiApiUrl, raiseAlert, ngDialog, $scope) {
 
         var ctrl = this;
@@ -40,6 +40,8 @@
 		ctrl.user_id = null;
                 ctrl.lab_location="internal";
                 ctrl.lab_email=null;
+                ctrl.lab_address=null;
+                ctrl.lab_phone=null;
 		ctrl.applications = [];
 		ctrl.showApplications = [];
 
@@ -47,6 +49,8 @@
 		ctrl.currentPage = 1;
 		ctrl.itemsPerPage = 5;
 		ctrl.numPages = null;
+                ctrl.lab_tpl="lab.tpl.html"
+                //ctrl.lab_html=$sce.trustAsHtml('<div>{{app.lab_email}}</div><div>{{app.lab_address}}</div><div>{{app.lab_phone}}</div>');
 
 		getApplication();
 	}
@@ -59,26 +63,25 @@
 		    "product_name": ctrl.product_name,
 		    "product_documentation": ctrl.product_documentation,
 		    "product_categories": ctrl.product_categories,
-		    "user_id": ctrl.user_id
+		    "user_id": ctrl.user_id,
+                    "lab_location": ctrl.lab_location,
+                    "lab_email": ctrl.lab_email,
+                    "lab_address": ctrl.lab_address,
+                    "lab_phone": ctrl.lab_phone
 		};
 		console.log(data);
 		$http.post(testapiApiUrl + "/cvp/applications", data).then(function(response){
-			ngDialog.close();
+			//ngDialog.close();
 			getApplication();
 		}, function(error){
 		});
 	}
 
 	ctrl.openConfirmModal = function(){
-                ngDialog.open({
-                    preCloseCallback: function(value) {
-                    },
-                    template: 'testapi-ui/components/application/modal/confirmModal.html',
-                    scope: $scope,
-                    className: 'ngdialog-theme-default custom-width-60',
-                    showClose: true,
-                    closeByDocument: true
-                });
+                var resp = confirm("Are you sure to submit?");
+                if (resp) {
+                    ctrl.submitForm();
+                }
 	}
 
 	ctrl.cancelSubmit = function(){
@@ -88,6 +91,21 @@
 	ctrl.updatePage = function(){
             getApplication();
 	}
+
+        ctrl.deleteApp = function(id){
+          var resp = confirm('Are you sure to delete this application?');
+          if (!resp)
+            return;
+
+          var delUrl = testapiApiUrl + "/cvp/applications/" + id;
+          $http.delete(delUrl)
+          .then( function(ret) {
+              if(ret.data.code && ret.data.code != 0) {
+                    alert(ret.data.msg);
+              }
+              getApplication();
+          });
+        }
 
 	function getApplication(){
 		$http.get(testapiApiUrl + "/cvp/applications?page="+ctrl.currentPage+"&signed&per_page="+ctrl.itemsPerPage).then(function(response){

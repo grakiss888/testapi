@@ -97,7 +97,7 @@ urpose. Once we understand more about your product or service, we can determine 
         </div>
 </div>
 <div class="Actions">
-        <input type="submit" value="submit" class="action" ng-click="ctrl.openConfirmModal()" />
+        <a class="nectar-button medium accent-color regular-button" ng-click="ctrl.openConfirmModal()" />submit</a>
 </div>
 <div  class="results-table" style="margin-top:40px">
     <table class="table table-striped table-hover">
@@ -110,18 +110,35 @@ urpose. Once we understand more about your product or service, we can determine 
                 <th>Product documentation</th>
                 <th>Product categories</th>
                 <th>User ID</th>
+                <th>Location</th>
+                <th>Operation</th>
             </tr>
         </thead>
-
-        <tbody>
-            <tr ng-repeat="application in ctrl.applications">
-                <td>{{ application.creation_date | limitTo: 10 }}</td>
-                <td>{{ application.organization_name }}</td>
-                <td>{{ application.organization_web }}</td>
-                <td>{{ application.product_name }}</td>
-                <td>{{ application.product_documentation }}</td>
-                <td>{{ application.product_categories }}</td>
-                <td>{{ application.user_id }}</td>
+      <script type="text/ng-template" id="lab.tpl.html">
+        <div class="input-group">
+          <span class="input-group-addon">@</span>
+          <input type="text" value="{{app.lab_email}}">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-map-marker"></i></span>
+          <input type="text" value="{{app.lab_address}}">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-phone"></i></span>
+          <input type="text" value="{{app.lab_phone}}">
+        </div>
+      </script>
+        <tbody style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <tr ng-repeat="app in ctrl.applications">
+                <td>{{ app.creation_date | limitTo: 10 }}</td>
+                <td>{{ app.organization_name }}</td>
+                <td>{{ app.organization_web }}</td>
+                <td>{{ app.product_name }}</td>
+                <td>{{ app.product_documentation }}</td>
+                <td>{{ app.product_categories | category }}</td>
+                <td>{{ app.user_id }}</td>
+                <td><span popover-enable="app.lab_location != 'internal'" uib-popover-template="ctrl.lab_tpl" popover-title="Lab Info" popover-placement="top" popover-trigger="mouseenter">{{ app.lab_location | labLocation}}</span><i ng-if="app.lab_location != 'internal'" class="glyphicon glyphicon-info-sign opnfv-blue"></i></td>
+                <td><a ng-click="ctrl.deleteApp(app._id)" class="badge badge-info"><i class="glyphicon glyphicon-remove" ></i></a></td>
             </tr>
         </tbody>
     </table>

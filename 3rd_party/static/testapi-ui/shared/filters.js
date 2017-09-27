@@ -72,4 +72,29 @@
             return string == undefined || string == "true";
         };
     }
+
+    angular
+        .module('testapiApp')
+        .filter('category', category);
+
+    function category() {
+        return function (string) {
+            if (string == "soft&hard")
+                return "software and hardware";
+            return "software and third party hardware";
+        };
+    }
+
+    angular
+        .module('testapiApp')
+        .filter('labLocation', labLocation);
+
+    function labLocation() {
+        return function (string) {
+            if (string == "internal")
+                return "internal vendor lab";
+            return "third-party lab";
+        };
+    }
+
 })();

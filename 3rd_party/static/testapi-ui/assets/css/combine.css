@@ -800,9 +800,6 @@ body, html {
   width: 100%;
   height: 100%; }
 
-body, h1, h2, h3, h4, h5, h6 {
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  font-weight: 400; }
 
 h1 {
   color: #2A4E68;
@@ -810,12 +807,6 @@ h1 {
   font-weight: 300;
   margin: 40px 0;
   text-align: center; }
-
-h2 {
-  color: #2A4E68;
-  font-weight: 300;
-  margin-bottom: 25px;
-  text-align: left; }
 
 h3 {
   color: #2A4E68; }
@@ -2643,7 +2634,7 @@ ul.resource-links li a:hover {
 
 /* site banner */
 .top-site-banner {
-  background-color: #248EC7;
+  background-color: #27CCC0;
   color: #fff;
   padding-top: 10px;
 }

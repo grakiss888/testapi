@@ -11,6 +11,7 @@ import json
 
 from tornado import web
 from tornado import gen
+from bson import objectid
 
 from opnfv_testapi.common.config import CONF
 from opnfv_testapi.resources import handlers
@@ -104,6 +105,11 @@ class ApplicationsCLHandler(GenericApplicationHandler):
 
 
 class ApplicationsGURHandler(GenericApplicationHandler):
+    @swagger.operation(nickname="deleteAppById")
+    def delete(self, id):
+        query = {'_id': objectid.ObjectId(id)}
+        self._delete(query=query)
+
     @swagger.operation(nickname="updateApplicationById")
     def put(self, application_id):
         """

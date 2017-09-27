@@ -149,3 +149,13 @@ table i.glyphicon {
     display: inline-block;
     margin-left: 20px;
 }
+
+.badge-info {
+    color: #fff;
+    background-color: #27CFC3;
+    border-color: #27CFC3;
+}
+
+.opnfv-blue {
+    color: #27CFC3;
+}
