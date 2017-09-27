@@ -72,7 +72,7 @@
 		console.log(data);
 		$http.post(testapiApiUrl + "/cvp/applications", data).then(function(resp){
                     if(resp.data.code && resp.data.code != 0) {
-                        alert(ret.data.msg);
+                        alert(resp.data.msg);
                         return;
                     }  
                     getApplication();
