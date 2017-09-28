@@ -79,7 +79,7 @@ class GenericApiHandler(web.RequestHandler):
                 role = self.get_secure_cookie(auth_const.ROLE)
                 logging.info('role:%s', role)
                 if role:
-                    if role == "reviewer":
+                    if role.find("reviewer") != -1:
                         query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
                                         {"owner": openid}, {"status": {"$ne": "private"}}]
                     else:
@@ -314,5 +314,5 @@ class VersionHandler(GenericApiHandler):
             @description: list all supported versions
             @rtype: L{Versions}
         """
-        versions = [{'version': 'api.cvp.0.6.2', 'description': 'basics'}]
+        versions = [{'version': 'api.cvp.0.7.0', 'description': 'basics'}]
         self.finish_request({'versions': versions})

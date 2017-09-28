@@ -93,6 +93,11 @@ class ApplicationsCLHandler(GenericApplicationHandler):
         miss_fields = []
         carriers = []
 
+        role = self.get_secure_cookie(auth_const.ROLE)
+        if role.find('administrator') == -1:
+            self.finish_request({'code': '403', 'msg': 'Only administrator is allowed to submit application.'})
+            return
+
         query = {"openid": self.json_args['user_id']}
         table = "users"
         ret, msg = yield self._check_if_exists(table=table, query=query)

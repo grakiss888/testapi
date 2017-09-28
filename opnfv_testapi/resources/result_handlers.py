@@ -69,7 +69,7 @@ class GenericResultHandler(handlers.GenericApiHandler):
                 if role:
                     del query['public']
                     query['user'] = openid
-                    if role == "reviewer":
+                    if role.find("reviewer") != -1:
                         del query['user']
                         query['review'] = 'true'
             elif k not in ['last', 'page', 'descend']:

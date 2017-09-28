@@ -190,7 +190,7 @@ class TestsGURHandler(GenericTestHandler):
                     raise gen.Return((False, message.no_auth()))
             if value == "approve" or value == "not approved":
                 logging.debug('check approve')
-                query['role'] = 'reviewer'
+                query['role'] = {"$regex": ".*reviewer.*"}
                 query['openid'] = user
                 data = yield dbapi.db_find_one('users', query)
                 if not data:

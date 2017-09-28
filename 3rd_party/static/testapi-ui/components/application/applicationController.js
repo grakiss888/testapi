@@ -35,10 +35,17 @@
 		ctrl.organization_name = null;
 		ctrl.organization_web = null;
 		ctrl.product_name = null;
+                ctrl.product_spec = null;
 		ctrl.product_documentation = null;
 		ctrl.product_categories = "soft&hard";
+                ctrl.prim_name = null;
+                ctrl.prim_email = null;
+                ctrl.prim_address = null;
+                ctrl.prim_phone = null;
+                ctrl.id_type = "Linux Foundation";
 		ctrl.user_id = null;
                 ctrl.lab_location="internal";
+                ctrl.lab_name = null;
                 ctrl.lab_email=null;
                 ctrl.lab_address=null;
                 ctrl.lab_phone=null;
@@ -49,7 +56,8 @@
 		ctrl.currentPage = 1;
 		ctrl.itemsPerPage = 5;
 		ctrl.numPages = null;
-                ctrl.lab_tpl="lab.tpl.html"
+                ctrl.lab_tpl = "lab.tpl.html";
+                ctrl.product_tpl = "product.tpl.html";
                 //ctrl.lab_html=$sce.trustAsHtml('<div>{{app.lab_email}}</div><div>{{app.lab_address}}</div><div>{{app.lab_phone}}</div>');
 
 		getApplication();
@@ -61,8 +69,14 @@
 		    "organization_name": ctrl.organization_name,
 		    "organization_web": ctrl.organization_web,
 		    "product_name": ctrl.product_name,
+                    "product_spec": ctrl.product_spec,
 		    "product_documentation": ctrl.product_documentation,
 		    "product_categories": ctrl.product_categories,
+                    "prim_name": ctrl.prim_name,
+                    "prim_email": ctrl.prim_email,
+                    "prim_address": ctrl.prim_address,
+                    "prim_phone": ctrl.prim_phone,
+                    "id_type": ctrl.id_type,
 		    "user_id": ctrl.user_id,
                     "lab_location": ctrl.lab_location,
                     "lab_email": ctrl.lab_email,

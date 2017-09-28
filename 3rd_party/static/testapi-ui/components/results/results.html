@@ -1,7 +1,7 @@
 <h3>{{ctrl.pageHeader}}</h3>
 <p>{{ctrl.pageParagraph}}</p>
 <form class="form-inline" ng-show="ctrl.isUserResults">
-<h4>Upload Results</h4>
+<h4>Upload Results<i class="glyphicon glyphicon-question-sign opnfv-blue" uib-tooltip="results file is logs.xxx.tar.gz under your dovetail installation path"></i></h4>
 <div class="form-group col-m-3">
      <input class="form-contrl nectar-button medium accent-color regular-button" type = "file" file-model = "resultFile"/>
 </div>
@@ -42,8 +42,8 @@
                         <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                             <li role="menuitem" ng-if="auth.currentUser.role == 'user'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status != 'review'}" ng-click="ctrl.toPrivate(result, 'private')">withdraw submit</a></li>
                             <li role="menuitem" ng-if="auth.currentUser.role == 'user'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status != 'private'}" ng-click="ctrl.toReview(result, 'review')">submit to review</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
-                            <li role="menuitem" ng-if="auth.currentUser.role == 'reviewer'" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approve')">not approve</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role.indexOf('reviewer') != -1" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status == 'approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'approve')">approve</a></li>
+                            <li role="menuitem" ng-if="auth.currentUser.role.indexOf('reviewer') != -1" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-class="{'hide': result.status == 'not approved'}" ng-click="ctrl.toggleCheck(result, 'status', 'not approve')">not approve</a></li>
                             <li role="menuitem" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-click="ctrl.openSharedModal(result)">share with</a></li>
                             <li role="menuitem" ng-if="auth.currentUser.openid == result.owner" class="menu-item menu-item-type-post_type menu-item-object-page"><a ng-click="ctrl.deleteTest(result._id)">delete</a></li>
                         </ul>

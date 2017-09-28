@@ -177,7 +177,7 @@
 
         /** This function will initate a sign out. */
         function doSignOut() {
-            resp = confirm("Do you want to sign out?");
+            var resp = confirm("Are you sure to sign out?");
             if (!resp)
                 return;
             $rootScope.auth.currentUser = null;

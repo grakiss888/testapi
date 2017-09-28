@@ -156,3 +156,7 @@ table .nectar-button.medium {
 .opnfv-blue {
     color: #27CFC3;
 }
+
+.field {
+    margin-bottom: 10px;
+}
