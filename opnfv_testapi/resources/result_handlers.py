@@ -246,7 +246,8 @@ class ResultsUploadHandler(ResultsCLHandler):
             @raise 400: body/pod_name/project_name/case_name not provided
         """
         fileinfo = self.request.files['file'][0]
-        tar_in = tarfile.open(fileobj=io.BytesIO(fileinfo['body']), mode="r:gz")
+        tar_in = tarfile.open(fileobj=io.BytesIO(fileinfo['body']),
+                              mode="r:gz")
         results = tar_in.extractfile('results/results.json').read()
         results = results.split('\n')
         result_ids = []

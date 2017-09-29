@@ -79,7 +79,8 @@ class SigninHandler(base.BaseHandler):
 
         # Step 1. Get a request token from Jira.
         try:
-            resp, content = client.request(CONF.jira_oauth_request_token_url, "POST")
+            resp, content = client.request(CONF.jira_oauth_request_token_url,
+                                           "POST")
         except Exception as e:
             logging.error('Connect jira exception: %s', e)
             self._auth_failure('Error: Connection to Jira failed. \
@@ -88,7 +89,8 @@ class SigninHandler(base.BaseHandler):
 
         if resp['status'] != '200':
             logging.error('Connect jira error: %s', resp)
-            self._auth_failure('Error: Connection to Jira failed. Error code(%s). \
+            self._auth_failure('Error: Connection to Jira failed. \
+                Error code(%s). \
                 Please contact an Administrator' % (resp['status']))
             return
 
@@ -96,7 +98,8 @@ class SigninHandler(base.BaseHandler):
         logging.warning('content is %s', content)
         request_token = dict(parse.parse_qsl(content.decode()))
         self.set_secure_cookie('oauth_token', request_token['oauth_token'])
-        self.set_secure_cookie('oauth_token_secret', request_token['oauth_token_secret'])
+        self.set_secure_cookie('oauth_token_secret',
+                               request_token['oauth_token_secret'])
 
         # Step 3. Redirect the user to the authentication URL.
         url = CONF.jira_oauth_authorize_url + '?oauth_token=' + \
@@ -186,7 +189,8 @@ class SigninReturnJiraHandler(base.BaseHandler):
     def get(self):
         logging.warning("jira return")
         # Step 1. Use the request token in the session to build a new client.
-        consumer = oauth.Consumer(CONF.jira_oauth_consumer_key, CONF.jira_oauth_consumer_secret)
+        consumer = oauth.Consumer(CONF.jira_oauth_consumer_key,
+                                  CONF.jira_oauth_consumer_secret)
         token = oauth.Token(self.get_secure_cookie('oauth_token'),
                             self.get_secure_cookie('oauth_token_secret'))
         client = oauth.Client(consumer, token)
@@ -194,13 +198,16 @@ class SigninReturnJiraHandler(base.BaseHandler):
 
         # Step 2. Request the authorized access token from Jira.
         try:
-            resp, content = client.request(CONF.jira_oauth_access_token_url, "POST")
+            resp, content = client.request(CONF.jira_oauth_access_token_url,
+                                           "POST")
         except Exception as e:
             logging.error("Connect jira exception:%s", e)
-            self._auth_failure('Error: Connection to Jira failed. Please contact an Administrator')
+            self._auth_failure('Error: Connection to Jira failed. \
+                Please contact an Administrator')
         if resp['status'] != '200':
             logging.error("Connect jira error:%s", resp)
-            self._auth_failure('Error: Connection to Jira failed. Please contact an Administrator')
+            self._auth_failure('Error: Connection to Jira failed. \
+                Please contact an Administrator')
         access_token = dict(parse.parse_qsl(content.decode()))
         logging.warning("access_token: %s", access_token)
 
@@ -257,7 +264,7 @@ class SignoutHandler(base.BaseHandler):
         self.redirect(url)
 
     def signout_jira(self):
-        params = {'alt_token': 'BZTJ-FE10-Z199-1QY6|2abf49ff634766a5560724845916ba484f812685|lin'}
+        params = {'alt_token': ''}
         url = parse.urljoin(CONF.jira_jira_url,
                             '/logout?' + parse.urlencode(params))
         self.redirect(url)

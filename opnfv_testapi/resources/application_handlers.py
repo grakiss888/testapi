@@ -35,7 +35,7 @@ class ApplicationsCLHandler(GenericApplicationHandler):
         """
             @description: Retrieve result(s) for a application project
                           on a specific pod.
-            @notes: Retrieve result(s) for a application project on a specific pod.
+            @notes: Retrieve application.
                 Available filters for this request are :
                  - id  : Application id
                  - period : x last days, incompatible with from/to
@@ -43,8 +43,6 @@ class ApplicationsCLHandler(GenericApplicationHandler):
                  - to : ending time in 2016-01-01 or 2016-01-01 00:01:23
                  - signed : get logined user result
 
-                GET /results/project=funcapplication&case=vPing&version=Arno-R1 \
-                &pod=pod_name&period=15&signed
             @return 200: all application results consist with query,
                          empty list if no result is found
             @rtype: L{Applications}
@@ -95,7 +93,8 @@ class ApplicationsCLHandler(GenericApplicationHandler):
 
         role = self.get_secure_cookie(auth_const.ROLE)
         if role.find('administrator') == -1:
-            self.finish_request({'code': '403', 'msg': 'Only administrator is allowed to submit application.'})
+            self.finish_request({'code': '403', 'msg': 'Only administrator \
+                is allowed to submit application.'})
             return
 
         query = {"openid": self.json_args['user_id']}
@@ -142,6 +141,7 @@ class ApplicationsGURHandler(GenericApplicationHandler):
     def update(self, application_id, item, value):
         self.json_args = {}
         self.json_args[item] = value
-        query = {'_id': application_id, 'owner': self.get_secure_cookie(auth_const.OPENID)}
+        query = {'_id': application_id, 'owner':
+                 self.get_secure_cookie(auth_const.OPENID)}
         db_keys = ['_id', 'owner']
         self._update(query=query, db_keys=db_keys)

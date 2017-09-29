@@ -80,11 +80,14 @@ class GenericApiHandler(web.RequestHandler):
                 logging.info('role:%s', role)
                 if role:
                     if role.find("reviewer") != -1:
-                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
-                                        {"owner": openid}, {"status": {"$ne": "private"}}]
+                        query['$or'] = [{"shared":
+                                         {"$elemMatch": {"$eq": openid}}
+                                         }, {"owner": openid},
+                                        {"status": {"$ne": "private"}}]
                     else:
-                        query['$or'] = [{"shared": {"$elemMatch": {"$eq": openid}}},
-                                        {"owner": openid}]
+                        query['$or'] = [{"shared":
+                                         {"$elemMatch": {"$eq": openid}}
+                                         }, {"owner": openid}]
             elif k not in ['last', 'page', 'descend', 'per_page']:
                 query[k] = v
             if date_range:

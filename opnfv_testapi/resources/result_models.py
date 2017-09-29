@@ -95,7 +95,8 @@ class TestResult(models.ModelBase):
                  pod_name=None, installer=None, version=None,
                  start_date=None, stop_date=None, details=None,
                  build_tag=None, scenario=None, criteria=None,
-                 user=None, public="true", review="false", trust_indicator=None):
+                 user=None, public="true", review="false",
+                 trust_indicator=None):
         self._id = _id
         self.case_name = case_name
         self.project_name = project_name
