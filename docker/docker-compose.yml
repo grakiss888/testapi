@@ -21,7 +21,7 @@ services:
         expose:
             - "27017"
     web:
-        image: opnfv/dovetail:web.cvp.0.7.1
+        image: opnfv/dovetail:web.cvp.0.8.0
         container_name: cvp-web
         restart: always
         environment:
@@ -36,7 +36,7 @@ services:
         ports:
             - "8000:8000"
     cvpapi:
-        image: opnfv/dovetail:api.cvp.0.7.1
+        image: opnfv/dovetail:api.cvp.0.8.0
         container_name: cvp-cvpapi
         environment:
             - mongodb_url=mongodb://mongodb:27017/
