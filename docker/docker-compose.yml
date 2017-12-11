@@ -6,7 +6,7 @@ services:
         container_name: cvp-testapi
         environment:
             - mongodb_url=mongodb://mongodb:27017/
-            - base_url=https://cvp.opnfv.org
+            - base_url=https://verified.opnfv.org
         volumes:
             - cvp-testapi-logs:/home/testapi/logs
         links:
@@ -26,7 +26,7 @@ services:
         restart: always
         environment:
             - testapi_url=testapi:8010
-            - VIRTUAL_HOST=cvp.opnfv.org
+            - VIRTUAL_HOST=verified.opnfv.org,cvp.opnfv.org
         volumes:
             - cvp-testapi-logs:/home/testapi/logs
         links:
@@ -40,7 +40,7 @@ services:
         container_name: cvp-cvpapi
         environment:
             - mongodb_url=mongodb://mongodb:27017/
-            - base_url=https://cvp.opnfv.org
+            - base_url=https://verified.opnfv.org
         volumes:
             - cvp-testapi-logs:/home/testapi/logs
         ports:
